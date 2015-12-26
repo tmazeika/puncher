@@ -94,8 +94,8 @@ func handleUploader(conn net.Conn) {
 
 func randSeq(n int) string {
     letters := []rune("abcdefghjklmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789")
-
     b := make([]rune, n)
+    rand.Seed(int64(time.Now().Nanosecond()))
 
     for i := range b {
         b[i] = letters[rand.Intn(len(letters))]
