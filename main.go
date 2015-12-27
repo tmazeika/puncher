@@ -56,8 +56,10 @@ func main() {
 
             switch ProtocolMessage(clientTypeBuffer[0]) {
             case DownloadClientType:
+                fmt.Printf("DEBUG: received download client -> %s\n", conn.RemoteAddr().String())
                 handleDownloader(conn, downloaders, downloadersMutex)
             case UploadClientType:
+                fmt.Printf("DEBUG: received upload client -> %s\n", conn.RemoteAddr().String())
                 handleUploader(conn, downloaders, downloadersMutex)
             default:
                 fmt.Fprintln(os.Stderr, "Protocol error")
