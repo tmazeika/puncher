@@ -7,53 +7,58 @@ import (
     "math/rand"
     "time"
     "sync"
+    "bufio"
 )
 
-// protocol information
 const (
-    ProtoPort uint16 =  50977
-    ProtoPortStr     = "50977"
-    ProtoPeerUIDLen  = 16
+    // TODO: these should be in a config
+    Port uint16 =  50977
+    PortStr     = "50977"
+
+    // UidLength is the length of the UID that the puncher server issues.
+    UidLength = 16
 )
 
-type ProtoMsg byte
+type ProtocolMessage byte
 
-// protocol messages
 const (
-    ProtoMsgClientTypeDL ProtoMsg = 0x00
-    ProtoMsgClientTypeUL ProtoMsg = 0x01
+    DownloadClientType ProtocolMessage = 0x00
+    UploadClientType   ProtocolMessage = 0x01
 )
 
-var awaitingConns = map[string]net.Conn{}
-var awaitingConnsMutex = &sync.Mutex{}
+type uidConnMap map[string]net.Conn
 
 func main() {
-    //rand.Seed(int64(time.Now().Nanosecond())) TODO: uncomment for production
+    // TODO: uncomment in release
+    //rand.Seed(int64(time.Now().Nanosecond()))
 
-    listener, err := net.Listen("tcp", net.JoinHostPort("", ProtoPortStr))
+    listener, err := net.Listen("tcp", net.JoinHostPort("", PortStr))
 
     if err != nil {
         fmt.Fprintln(os.Stderr, err)
         os.Exit(1)
     }
 
+    downloaders := uidConnMap{}
+    downloadersMutex := &sync.Mutex{}
+
     for {
         conn, err := listener.Accept()
 
-        go func() {
-            if err != nil {
-                fmt.Fprintln(os.Stderr, err)
-                return
-            }
+        if err != nil {
+            fmt.Println(os.Stderr, err)
+            continue
+        }
 
+        go func() {
             clientTypeBuffer := make([]byte, 1)
             conn.Read(clientTypeBuffer)
 
-            switch ProtoMsg(clientTypeBuffer[0]) {
-            case ProtoMsgClientTypeDL:
-                go handleDownloader(conn)
-            case ProtoMsgClientTypeUL:
-                go handleUploader(conn)
+            switch ProtocolMessage(clientTypeBuffer[0]) {
+            case DownloadClientType:
+                go handleDownloader(conn, downloaders, downloadersMutex)
+            case UploadClientType:
+                go handleUploader(conn, downloaders, downloadersMutex)
             default:
                 fmt.Fprintln(os.Stderr, "Protocol error")
             }
@@ -61,46 +66,69 @@ func main() {
     }
 }
 
-func handleDownloader(conn net.Conn) {
-    var uid string
-    awaitingConnsMutex.Lock()
+func handleDownloader(conn net.Conn, downloaders uidConnMap, downloadersMutex *sync.Mutex) {
+    defer conn.Close()
 
-    for uid == "" || awaitingConns[uid] != nil {
-        uid = randSeq(ProtoPeerUIDLen)
+    var uid string
+
+    downloadersMutex.Lock()
+
+    for len(uid) == 0 || downloaders[uid] != nil {
+        uid = randSeq(UidLength)
     }
 
-    awaitingConns[uid] = conn
-    awaitingConnsMutex.Unlock()
-    conn.Write([]byte(uid))
-    conn.Close()
+    downloaders[uid] = conn
+
+    downloadersMutex.Unlock()
+
+    if _, err := conn.Write([]byte(uid)); err != nil {
+        fmt.Fprintln(os.Stderr, err)
+    }
+
+    fmt.Printf("DEBUG: wrote to downloader: '%s'\n", uid)
 }
 
-func handleUploader(conn net.Conn) {
-    uidBuffer := make([]byte, ProtoPeerUIDLen)
-    conn.Read(uidBuffer)
-    uid := string(uidBuffer)
-    awaitingConnsMutex.Lock()
+func handleUploader(conn net.Conn, downloaders uidConnMap, downloadersMutex *sync.Mutex) {
+    defer conn.Close()
 
-    for awaitingConns[uid] == nil {
-        awaitingConnsMutex.Unlock()
-        time.Sleep(time.Millisecond * 100)
-        awaitingConnsMutex.Lock()
+    uidBuffer := make([]byte, UidLength)
+
+    if _, err := conn.Read(uidBuffer); err != nil {
+        fmt.Fprintln(os.Stderr, err)
     }
 
-    awaitingConn := awaitingConns[uid]
-    awaitingConnsMutex.Unlock()
-    conn.Write([]byte(awaitingConn.RemoteAddr().String() + "\n"))
-    conn.Close()
-    delete(awaitingConns, uid)
+    uid := string(uidBuffer)
+
+    downloadersMutex.Lock()
+
+    for downloaders[uid] == nil {
+        downloadersMutex.Unlock()
+        time.Sleep(time.Second)
+        downloadersMutex.Lock()
+    }
+
+    dlConn := downloaders[uid]
+
+    downloadersMutex.Unlock()
+
+    out := bufio.NewWriter(conn)
+
+    out.WriteString(dlConn.RemoteAddr().String())
+    out.WriteRune('\n')
+    out.Flush()
+
+    fmt.Printf("DEBUG: wrote to uploader: '%s'\n", dlConn.RemoteAddr().String())
+
+    delete(downloaders, uid)
 }
 
 func randSeq(n int) string {
     letters := []rune("abcdefghjklmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789")
-    b := make([]rune, n)
+    seq := make([]byte, n)
 
-    for i := range b {
-        b[i] = letters[rand.Intn(len(letters))]
+    for i := range seq {
+        seq[i] = byte(letters[rand.Intn(len(letters))])
     }
 
-    return string(b)
+    return string(seq)
 }
