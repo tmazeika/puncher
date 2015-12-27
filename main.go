@@ -56,9 +56,9 @@ func main() {
 
             switch ProtocolMessage(clientTypeBuffer[0]) {
             case DownloadClientType:
-                go handleDownloader(conn, downloaders, downloadersMutex)
+                handleDownloader(conn, downloaders, downloadersMutex)
             case UploadClientType:
-                go handleUploader(conn, downloaders, downloadersMutex)
+                handleUploader(conn, downloaders, downloadersMutex)
             default:
                 fmt.Fprintln(os.Stderr, "Protocol error")
             }
