@@ -28,7 +28,7 @@ var awaitingConns = map[string]net.Conn{}
 var awaitingConnsMutex = &sync.Mutex{}
 
 func main() {
-    rand.Seed(int64(time.Now().Nanosecond()))
+    //rand.Seed(int64(time.Now().Nanosecond())) TODO: uncomment for production
 
     listener, err := net.Listen("tcp", net.JoinHostPort("", ProtoPortStr))
 
