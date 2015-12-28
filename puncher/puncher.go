@@ -20,12 +20,12 @@ const (
 
 type uidConnMap map[string]net.Conn
 
-type Args struct {
+type args struct {
     port   string
     appDir string
 }
 
-func (a Args) PortOrDef(def string) string {
+func (a args) portOrDef(def string) string {
     if len(a.port) == 0 {
         return def
     }
@@ -34,7 +34,7 @@ func (a Args) PortOrDef(def string) string {
 }
 
 func Start(c *cli.Context) {
-    args := Args{
+    args := args{
         port:   c.GlobalString("port"),
         appDir: c.GlobalString("app-dir"),
     }
