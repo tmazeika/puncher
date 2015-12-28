@@ -101,6 +101,12 @@ func Start(c *cli.Context) {
     }
 }
 
+func uidExists(downloaders uidConnMap, uid string) bool {
+    _, exists := downloaders[uid]
+
+    return exists
+}
+
 func handleDownloader(conn net.Conn, downloaders uidConnMap, downloadersMutex *sync.Mutex) {
     defer conn.Close()
 
@@ -109,7 +115,7 @@ func handleDownloader(conn net.Conn, downloaders uidConnMap, downloadersMutex *s
 
     downloadersMutex.Lock()
 
-    for len(uid) == 0 || downloaders[uid] != nil {
+    for len(uid) == 0 || uidExists(downloaders, uid) {
         uid = randSeq(common.UidLength)
     }
 
@@ -118,7 +124,7 @@ func handleDownloader(conn net.Conn, downloaders uidConnMap, downloadersMutex *s
         readyCh: make(chan int),
     }
 
-    downloaders[uid] = &downloader
+    downloaders[uid] = downloader
 
     downloadersMutex.Unlock()
 
@@ -152,7 +158,7 @@ func handleDownloader(conn net.Conn, downloaders uidConnMap, downloadersMutex *s
         time.Sleep(time.Second)
     }
 
-    delete(downloaders, downloader)
+    delete(downloaders, uid)
 }
 
 func handleUploader(conn net.Conn, downloaders uidConnMap, downloadersMutex *sync.Mutex) {
@@ -169,7 +175,7 @@ func handleUploader(conn net.Conn, downloaders uidConnMap, downloadersMutex *syn
 
     downloadersMutex.Lock()
 
-    for downloaders[uid] == nil {
+    for ! uidExists(downloaders, uid) {
         downloadersMutex.Unlock()
         time.Sleep(time.Second)
 
@@ -194,9 +200,8 @@ func handleUploader(conn net.Conn, downloaders uidConnMap, downloadersMutex *syn
     out := bufio.NewWriter(conn)
     dlAddrStr := downloader.conn.RemoteAddr().String()
 
-    out.WriteByte(common.PuncherEndPing)
-
     // TODO: error check
+    out.Write(common.Mtob(common.PuncherEndPing))
     out.WriteString(dlAddrStr)
     out.WriteRune('\n')
     out.Flush()
@@ -220,7 +225,7 @@ func ping(conn net.Conn) bool {
 
     if _, err := conn.Write(common.Mtob(common.PuncherPing)); err != nil {
         fmt.Fprintf(os.Stderr, "Error for '%': %s\n", connAddrStr, err)
-        return
+        return false
     }
 
     pongBuffer := make([]byte, 1)
