@@ -1,6 +1,7 @@
 package puncher
 
 import (
+    "github.com/transhift/common/common"
     "net"
     "fmt"
     "os"
@@ -10,6 +11,11 @@ import (
     "time"
     "github.com/codegangsta/cli"
     "crypto/tls"
+)
+
+const (
+    CertFileName = "puncher_cert.pem"
+    KeyFileName = "puncher_cert.key"
 )
 
 type uidConnMap map[string]net.Conn
@@ -33,11 +39,11 @@ func Start(c *cli.Context) {
         appDir: c.GlobalString("app-dir"),
     }
 
-    storage := &Storage{
-        customDir: args.appDir,
+    storage := &common.Storage{
+        CustomDir: args.appDir,
     }
 
-    cert, err := storage.Certificate()
+    cert, err := storage.Certificate(CertFileName, KeyFileName)
 
     if err != nil {
         fmt.Fprintln(os.Stderr, err)
