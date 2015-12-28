@@ -109,6 +109,8 @@ func handleDownloader(conn net.Conn, downloaders uidConnMap, downloadersMutex *s
     if _, err := conn.Write([]byte(uid)); err != nil {
         fmt.Fprintln(os.Stderr, err)
     }
+
+    fmt.Printf("Gave downloader @ %s UID: %s\n", conn.RemoteAddr().String(), uid)
 }
 
 func handleUploader(conn net.Conn, downloaders uidConnMap, downloadersMutex *sync.Mutex) {
@@ -135,10 +137,12 @@ func handleUploader(conn net.Conn, downloaders uidConnMap, downloadersMutex *syn
     downloadersMutex.Unlock()
 
     out := bufio.NewWriter(conn)
+    remoteAddrStr := dlConn.RemoteAddr().String()
 
-    out.WriteString(dlConn.RemoteAddr().String())
+    out.WriteString(remoteAddrStr)
     out.WriteRune('\n')
     out.Flush()
+    fmt.Printf("Gave uploader @ %s downloader's UID: %s\n", conn.RemoteAddr().String(), remoteAddrStr)
 
     delete(downloaders, uid)
 }
