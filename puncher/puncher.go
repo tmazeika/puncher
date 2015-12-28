@@ -211,7 +211,7 @@ func handleUploader(conn net.Conn, downloaders uidConnMap, downloadersMutex *syn
     out.WriteString(dlAddrStr)
     out.WriteRune('\n')
     out.Flush()
-    fmt.Printf("Gave uploader '%s' downloader's address: %s\n", dlAddrStr, uid)
+    fmt.Printf("Gave uploader '%s' downloader's address: '%s'\n", ulAddrStr, dlAddrStr)
 
     downloader.readyCh <- 0
 
