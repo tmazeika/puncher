@@ -79,10 +79,10 @@ func Start(c *cli.Context) {
             clientTypeBuffer := make([]byte, 1)
             conn.Read(clientTypeBuffer)
 
-            switch ProtocolMessage(clientTypeBuffer[0]) {
-            case DownloadClientType:
+            switch common.ProtocolMessage(clientTypeBuffer[0]) {
+            case common.DownloadClientType:
                 handleDownloader(conn, downloaders, downloadersMutex)
-            case UploadClientType:
+            case common.UploadClientType:
                 handleUploader(conn, downloaders, downloadersMutex)
             default:
                 fmt.Fprintln(os.Stderr, "Protocol error")
@@ -99,7 +99,7 @@ func handleDownloader(conn net.Conn, downloaders uidConnMap, downloadersMutex *s
     downloadersMutex.Lock()
 
     for len(uid) == 0 || downloaders[uid] != nil {
-        uid = randSeq(UidLength)
+        uid = randSeq(common.UidLength)
     }
 
     downloaders[uid] = conn
@@ -114,7 +114,7 @@ func handleDownloader(conn net.Conn, downloaders uidConnMap, downloadersMutex *s
 func handleUploader(conn net.Conn, downloaders uidConnMap, downloadersMutex *sync.Mutex) {
     defer conn.Close()
 
-    uidBuffer := make([]byte, UidLength)
+    uidBuffer := make([]byte, common.UidLength)
 
     if _, err := conn.Read(uidBuffer); err != nil {
         fmt.Fprintln(os.Stderr, err)
