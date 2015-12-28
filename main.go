@@ -2,7 +2,7 @@ package main
 
 import (
     "github.com/codegangsta/cli"
-    "github.com/bionicrm/transhift-puncher/puncher"
+    "github.com/transhift/puncher/puncher"
     "os"
 )
 
