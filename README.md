@@ -1,3 +1,3 @@
 # Puncher
 
-Hole punching server for [Transhift](https://github.com/transhift/transhift).
+TCP hole puncher for [Transhift](https://github.com/transhift/transhift).
