@@ -9,12 +9,14 @@ import (
     "bufio"
     "time"
     "github.com/codegangsta/cli"
+    "crypto/tls"
 )
 
 type uidConnMap map[string]net.Conn
 
 type Args struct {
-    port string
+    port   string
+    appDir string
 }
 
 func (a Args) PortOrDef(def string) string {
@@ -27,10 +29,25 @@ func (a Args) PortOrDef(def string) string {
 
 func Start(c *cli.Context) {
     args := Args{
-        port: c.GlobalString("port"),
+        port:   c.GlobalString("port"),
+        appDir: c.GlobalString("app-dir"),
     }
 
-    listener, err := net.Listen("tcp", net.JoinHostPort("", args.port))
+    storage := &Storage{
+        customDir: args.appDir,
+    }
+
+    cert, err := storage.Certificate()
+
+    if err != nil {
+        fmt.Fprintln(os.Stderr, err)
+        os.Exit(1)
+    }
+
+    listener, err := tls.Listen("tcp", net.JoinHostPort("", args.port), &tls.Config{
+        Certificates: []tls.Certificate{cert},
+        MinVersion: tls.VersionTLS12,
+    })
 
     if err != nil {
         fmt.Fprintln(os.Stderr, err)

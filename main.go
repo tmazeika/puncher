@@ -19,6 +19,11 @@ func main() {
             Value: "50977",
             Usage: "port to bind to",
         },
+        cli.StringFlag{
+            Name: "app-dir",
+            Value: "",
+            Usage: "application directory",
+        },
     }
 
     app.Action = puncher.Start
