@@ -128,6 +128,7 @@ func handleDownloader(conn net.Conn, downloaders uidConnMap, downloadersMutex *s
 
     downloadersMutex.Unlock()
 
+    // OUT: UID
     if _, err := conn.Write([]byte(uid)); err != nil {
         fmt.Fprintln(os.Stderr, err)
     }
@@ -138,6 +139,7 @@ func handleDownloader(conn net.Conn, downloaders uidConnMap, downloadersMutex *s
         <- downloader.readyCh
 
         downloader.ready = true
+        // OUT: PuncherReady
         _, err := conn.Write(common.Mtob(common.PuncherReady))
 
         if err != nil {
@@ -150,6 +152,7 @@ func handleDownloader(conn net.Conn, downloaders uidConnMap, downloadersMutex *s
     time.Sleep(time.Second)
 
     for ! downloader.ready {
+        // OUT: **ping**
         if active := ping(conn); ! active {
             fmt.Printf("Downloader '%s' timed out\n", dlAddrStr)
             return
@@ -179,6 +182,7 @@ func handleUploader(conn net.Conn, downloaders uidConnMap, downloadersMutex *syn
         downloadersMutex.Unlock()
         time.Sleep(time.Second)
 
+        // OUT: **ping**
         if active := ping(conn); ! active {
             fmt.Printf("Uploader '%s' timed out\n", ulAddrStr)
             return
@@ -191,7 +195,7 @@ func handleUploader(conn net.Conn, downloaders uidConnMap, downloadersMutex *syn
 
     downloadersMutex.Unlock()
 
-    // final ping
+    // OUT: **ping**
     if active := ping(conn); ! active {
         fmt.Printf("Uploader '%s' timed out\n", ulAddrStr)
         return
@@ -201,7 +205,9 @@ func handleUploader(conn net.Conn, downloaders uidConnMap, downloadersMutex *syn
     dlAddrStr := downloader.conn.RemoteAddr().String()
 
     // TODO: error check
+    // OUT: EndPing
     out.Write(common.Mtob(common.PuncherEndPing))
+    // OUT: downloader address + NL
     out.WriteString(dlAddrStr)
     out.WriteRune('\n')
     out.Flush()
@@ -212,9 +218,11 @@ func handleUploader(conn net.Conn, downloaders uidConnMap, downloadersMutex *syn
     downloaderReady := <- downloader.responseCh
 
     if downloaderReady {
+        // OUT: PuncherReady
         conn.Write(common.Mtob(common.PuncherReady))
         fmt.Printf("Told uploader '%s' that downloader was ready\n", ulAddrStr)
     } else {
+        // OUT: PuncherNotReady
         conn.Write(common.Mtob(common.PuncherNotReady))
         fmt.Printf("Told uploader '%s' that downloader was **NOT** ready\n", ulAddrStr)
     }
@@ -223,6 +231,7 @@ func handleUploader(conn net.Conn, downloaders uidConnMap, downloadersMutex *syn
 func ping(conn net.Conn) bool {
     connAddrStr := conn.RemoteAddr().String()
 
+    // OUT: PuncherPing
     if _, err := conn.Write(common.Mtob(common.PuncherPing)); err != nil {
         fmt.Fprintf(os.Stderr, "Error for '%': %s\n", connAddrStr, err)
         return false
@@ -232,15 +241,16 @@ func ping(conn net.Conn) bool {
 
     conn.SetReadDeadline(time.Now().Add(time.Second * 30))
 
+    // IN: PuncherPong
     if _, err := conn.Read(pongBuffer); err != nil {
         return false
     }
 
     conn.SetReadDeadline(time.Time{})
 
-    pong := common.ProtocolMessage(pongBuffer[0])
+    pong := pongBuffer[0]
 
-    switch pong {
+    switch common.ProtocolMessage(pong) {
     case common.PuncherPong:
         return true
     default:
