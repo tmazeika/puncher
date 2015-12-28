@@ -18,7 +18,14 @@ const (
     KeyFileName = "puncher_cert.key"
 )
 
-type uidConnMap map[string]net.Conn
+type downloader struct {
+    conn       net.Conn
+    ready      bool
+    readyCh    chan int
+    responseCh chan bool
+}
+
+type uidConnMap map[string]downloader
 
 type args struct {
     port   string
@@ -77,15 +84,18 @@ func Start(c *cli.Context) {
 
         go func() {
             clientTypeBuffer := make([]byte, 1)
+
             conn.Read(clientTypeBuffer)
 
-            switch common.ProtocolMessage(clientTypeBuffer[0]) {
+            clientType := common.ProtocolMessage(clientTypeBuffer[0])
+
+            switch clientType {
             case common.DownloadClientType:
                 handleDownloader(conn, downloaders, downloadersMutex)
             case common.UploadClientType:
                 handleUploader(conn, downloaders, downloadersMutex)
             default:
-                fmt.Fprintln(os.Stderr, "Protocol error")
+                fmt.Fprintf(os.Stderr, "Protocol error from '%s': expected client type, got 0x%X\n", conn.RemoteAddr().String(), clientType)
             }
         }()
     }
@@ -94,6 +104,7 @@ func Start(c *cli.Context) {
 func handleDownloader(conn net.Conn, downloaders uidConnMap, downloadersMutex *sync.Mutex) {
     defer conn.Close()
 
+    dlAddrStr := conn.RemoteAddr().String()
     var uid string
 
     downloadersMutex.Lock()
@@ -102,7 +113,12 @@ func handleDownloader(conn net.Conn, downloaders uidConnMap, downloadersMutex *s
         uid = randSeq(common.UidLength)
     }
 
-    downloaders[uid] = conn
+    downloader := downloader{
+        conn:    conn,
+        readyCh: make(chan int),
+    }
+
+    downloaders[uid] = &downloader
 
     downloadersMutex.Unlock()
 
@@ -110,12 +126,39 @@ func handleDownloader(conn net.Conn, downloaders uidConnMap, downloadersMutex *s
         fmt.Fprintln(os.Stderr, err)
     }
 
-    fmt.Printf("Gave downloader @ %s UID: %s\n", conn.RemoteAddr().String(), uid)
+    fmt.Printf("Gave downloader '%s' UID: %s\n", dlAddrStr, uid)
+
+    go func() {
+        <- downloader.readyCh
+
+        downloader.ready = true
+        _, err := conn.Write(common.Mtob(common.PuncherReady))
+
+        if err != nil {
+            fmt.Fprintf(os.Stderr, "Error for downloader '%': %s\n", dlAddrStr, err)
+        }
+
+        downloader.responseCh <- err == nil
+    }()
+
+    time.Sleep(time.Second)
+
+    for ! downloader.ready {
+        if active := ping(conn); ! active {
+            fmt.Printf("Downloader '%s' timed out\n", dlAddrStr)
+            return
+        }
+
+        time.Sleep(time.Second)
+    }
+
+    delete(downloaders, downloader)
 }
 
 func handleUploader(conn net.Conn, downloaders uidConnMap, downloadersMutex *sync.Mutex) {
     defer conn.Close()
 
+    ulAddrStr := conn.RemoteAddr().String()
     uidBuffer := make([]byte, common.UidLength)
 
     if _, err := conn.Read(uidBuffer); err != nil {
@@ -129,22 +172,73 @@ func handleUploader(conn net.Conn, downloaders uidConnMap, downloadersMutex *syn
     for downloaders[uid] == nil {
         downloadersMutex.Unlock()
         time.Sleep(time.Second)
+
+        if active := ping(conn); ! active {
+            fmt.Printf("Uploader '%s' timed out\n", ulAddrStr)
+            return
+        }
+
         downloadersMutex.Lock()
     }
 
-    dlConn := downloaders[uid]
+    downloader := downloaders[uid]
 
     downloadersMutex.Unlock()
 
-    out := bufio.NewWriter(conn)
-    remoteAddrStr := dlConn.RemoteAddr().String()
+    // final ping
+    if active := ping(conn); ! active {
+        fmt.Printf("Uploader '%s' timed out\n", ulAddrStr)
+        return
+    }
 
-    out.WriteString(remoteAddrStr)
+    out := bufio.NewWriter(conn)
+
+    // TODO: error check
+    out.WriteString(downloader.conn.RemoteAddr().String())
     out.WriteRune('\n')
     out.Flush()
-    fmt.Printf("Gave uploader @ %s downloader's UID: %s\n", conn.RemoteAddr().String(), remoteAddrStr)
+    fmt.Printf("Gave uploader '%s' downloader's UID: %s\n", ulAddrStr, uid)
 
-    delete(downloaders, uid)
+    downloader.readyCh <- 0
+
+    downloaderReady := <- downloader.responseCh
+
+    if downloaderReady {
+        conn.Write(common.Mtob(common.PuncherReady))
+        fmt.Printf("Told uploader '%s' that downloader was ready\n", ulAddrStr)
+    } else {
+        conn.Write(common.Mtob(common.PuncherNotReady))
+        fmt.Printf("Told uploader '%s' that downloader was **NOT** ready\n", ulAddrStr)
+    }
+}
+
+func ping(conn net.Conn) bool {
+    connAddrStr := conn.RemoteAddr().String()
+
+    if _, err := conn.Write(common.Mtob(common.PuncherPing)); err != nil {
+        fmt.Fprintf(os.Stderr, "Error for '%': %s\n", connAddrStr, err)
+        return
+    }
+
+    pongBuffer := make([]byte, 1)
+
+    conn.SetReadDeadline(time.Now().Add(time.Second * 30))
+
+    if _, err := conn.Read(pongBuffer); err != nil {
+        return false
+    }
+
+    conn.SetReadDeadline(time.Time{})
+
+    pong := common.ProtocolMessage(pongBuffer[0])
+
+    switch pong {
+    case common.PuncherPong:
+        return true
+    default:
+        fmt.Fprintf(os.Stderr, "Protocol error from '%s': expected pong, got 0x%X\n", connAddrStr, pong)
+        return false
+    }
 }
 
 func randSeq(n int) string {
