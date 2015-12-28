@@ -192,12 +192,15 @@ func handleUploader(conn net.Conn, downloaders uidConnMap, downloadersMutex *syn
     }
 
     out := bufio.NewWriter(conn)
+    dlAddrStr := downloader.conn.RemoteAddr().String()
+
+    out.WriteByte(common.PuncherEndPing)
 
     // TODO: error check
-    out.WriteString(downloader.conn.RemoteAddr().String())
+    out.WriteString(dlAddrStr)
     out.WriteRune('\n')
     out.Flush()
-    fmt.Printf("Gave uploader '%s' downloader's UID: %s\n", ulAddrStr, uid)
+    fmt.Printf("Gave uploader '%s' downloader's address: %s\n", dlAddrStr, uid)
 
     downloader.readyCh <- 0
 
