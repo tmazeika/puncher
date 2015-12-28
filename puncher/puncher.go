@@ -55,7 +55,8 @@ func Start(c *cli.Context) {
     }
 
     fmt.Printf("Listening on port %s\n", args.port)
-    rand.Seed(int64(time.Now().Nanosecond()))
+    // TODO: uncomment for release
+    //rand.Seed(int64(time.Now().Nanosecond()))
 
     downloaders := uidConnMap{}
     downloadersMutex := &sync.Mutex{}
