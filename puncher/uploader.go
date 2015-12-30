@@ -1,5 +1,6 @@
 package puncher
 
+/*
 import (
     "net"
     "github.com/transhift/common/common"
@@ -141,3 +142,4 @@ func handleUploader(u *Uploader, p *DownloaderPool, b *Broadcaster) {
         }
     }
 }
+*/

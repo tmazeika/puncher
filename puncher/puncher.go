@@ -120,6 +120,25 @@ func handleConn(conn net.Conn) {
     }
 }
 
+type DownloaderPool
+
+func handleUploader(conn net.Conn, msgCh chan common.Message) {
+    msg, ok := <- msgCh
+
+    if ! ok {
+        fmt.Printf("Closing connection with '%s'\n", conn.RemoteAddr())
+        return
+    }
+
+    // Expect Uid message.
+    if msg.Packet != common.UidRequest {
+        fmt.Fprintf(os.Stderr, "Expected Uid message from '%s', got 0x%x\n", conn.RemoteAddr(), msg)
+        return
+    }
+
+    uid := string(msg.Body)
+}
+
 /*func uidExists(downloaders uidConnMap, uid string) bool {
     _, exists := downloaders[uid]
 
