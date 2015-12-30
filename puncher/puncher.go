@@ -82,7 +82,7 @@ func Start(c *cli.Context) {
 
         go handleConn(conn)
 
-        go func() {
+        /*go func() {
             clientTypeBuffer := make([]byte, 1)
 
             conn.Read(clientTypeBuffer)
@@ -97,7 +97,7 @@ func Start(c *cli.Context) {
             default:
                 fmt.Fprintf(os.Stderr, "Protocol error from '%s': expected client type, got 0x%X\n", conn.RemoteAddr().String(), clientType)
             }
-        }()
+        }()*/
     }
 }
 
