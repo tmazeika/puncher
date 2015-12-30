@@ -279,7 +279,7 @@ func handleUploader(conn net.Conn, downloaders uidConnMap, downloadersMutex *syn
 //}
 
 func generateUid() (string, error) {
-    uidBuff := make([]byte, common.UidLength)
+    uidBuff := make([]byte, common.UidLength / 2) // 2 hex chars per byte
 
     if _, err := rand.Read(uidBuff); err != nil {
         return "", err
