@@ -6,11 +6,9 @@ import (
     "fmt"
     "os"
     "sync"
-    "math/rand"
-    "bufio"
-    "time"
     "github.com/codegangsta/cli"
     "crypto/tls"
+    "crypto/rand"
 )
 
 const (
@@ -280,13 +278,12 @@ func handleUploader(conn net.Conn, downloaders uidConnMap, downloadersMutex *syn
 //    }
 //}
 
-func randSeq(n int) string {
-    letters := []rune("abcdefghjklmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789")
-    seq := make([]byte, n)
+func generateUid() (string, error) {
+    uidBuff := make([]byte, common.UidLength)
 
-    for i := range seq {
-        seq[i] = byte(letters[rand.Intn(len(letters))])
+    if _, err := rand.Read(uidBuff); err != nil {
+        return "", err
     }
 
-    return string(seq)
+    return fmt.Sprintf("%x", uidBuff)
 }
