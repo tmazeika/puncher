@@ -59,7 +59,7 @@ func Start(c *cli.Context) {
 
     listener, err := tls.Listen("tcp", net.JoinHostPort("", args.port), &tls.Config{
         Certificates: []tls.Certificate{cert},
-        MinVersion: tls.VersionTLS12,
+        MinVersion:   tls.VersionTLS12,
     })
 
     if err != nil {
@@ -82,6 +82,8 @@ func Start(c *cli.Context) {
             continue
         }
 
+        go handleConn(conn)
+
         go func() {
             clientTypeBuffer := make([]byte, 1)
 
@@ -101,13 +103,32 @@ func Start(c *cli.Context) {
     }
 }
 
-func uidExists(downloaders uidConnMap, uid string) bool {
+func handleConn(conn net.Conn) {
+    defer conn.Close()
+
+    msgCh := common.MessageChannel(conn)
+
+    msg, ok := <- msgCh
+
+    if ! ok {
+        fmt.Printf("Closing connection with '%s'\n", conn.RemoteAddr())
+        return
+    }
+
+    // Expect ClientType message.
+    if msg.Packet != common.ClientType {
+        fmt.Fprintf(os.Stderr, "Expected ClientType message from '%s', got 0x%x\n", conn.RemoteAddr(), msg)
+        return
+    }
+}
+
+/*func uidExists(downloaders uidConnMap, uid string) bool {
     _, exists := downloaders[uid]
 
     return exists
 }
 
-func handleDownloader(conn net.Conn, downloaders uidConnMap, downloadersMutex *sync.Mutex) {
+func _handleDownloader(conn net.Conn, downloaders uidConnMap, downloadersMutex *sync.Mutex) {
     defer conn.Close()
 
     dlAddrStr := conn.RemoteAddr().String()
@@ -226,38 +247,38 @@ func handleUploader(conn net.Conn, downloaders uidConnMap, downloadersMutex *syn
         conn.Write(common.Mtob(common.PuncherNotReady))
         fmt.Printf("Told uploader '%s' that downloader was **NOT** ready\n", ulAddrStr)
     }
-}
+}*/
 
-func ping(conn net.Conn) bool {
-    connAddrStr := conn.RemoteAddr().String()
-
-    // OUT: PuncherPing
-    if _, err := conn.Write(common.Mtob(common.PuncherPing)); err != nil {
-        fmt.Fprintf(os.Stderr, "Error for '%': %s\n", connAddrStr, err)
-        return false
-    }
-
-    pongBuffer := make([]byte, 1)
-
-    conn.SetReadDeadline(time.Now().Add(time.Second * 30))
-
-    // IN: PuncherPong
-    if _, err := conn.Read(pongBuffer); err != nil {
-        return false
-    }
-
-    conn.SetReadDeadline(time.Time{})
-
-    pong := pongBuffer[0]
-
-    switch common.ProtocolMessage(pong) {
-    case common.PuncherPong:
-        return true
-    default:
-        fmt.Fprintf(os.Stderr, "Protocol error from '%s': expected pong, got 0x%X\n", connAddrStr, pong)
-        return false
-    }
-}
+//func ping(conn net.Conn) bool {
+//    connAddrStr := conn.RemoteAddr().String()
+//
+//    // OUT: PuncherPing
+//    if _, err := conn.Write(common.Mtob(common.PuncherPing)); err != nil {
+//        fmt.Fprintf(os.Stderr, "Error for '%': %s\n", connAddrStr, err)
+//        return false
+//    }
+//
+//    pongBuffer := make([]byte, 1)
+//
+//    conn.SetReadDeadline(time.Now().Add(time.Second * 30))
+//
+//    // IN: PuncherPong
+//    if _, err := conn.Read(pongBuffer); err != nil {
+//        return false
+//    }
+//
+//    conn.SetReadDeadline(time.Time{})
+//
+//    pong := pongBuffer[0]
+//
+//    switch common.ProtocolMessage(pong) {
+//    case common.PuncherPong:
+//        return true
+//    default:
+//        fmt.Fprintf(os.Stderr, "Protocol error from '%s': expected pong, got 0x%X\n", connAddrStr, pong)
+//        return false
+//    }
+//}
 
 func randSeq(n int) string {
     letters := []rune("abcdefghjklmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789")
