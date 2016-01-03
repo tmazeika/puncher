@@ -66,7 +66,7 @@ func Start(c *cli.Context) {
         conn, err := listener.Accept()
 
         if err != nil {
-            fmt.Println(os.Stderr, err)
+            fmt.Println(os.Stderr, "Error accepting connection:", err)
             continue
         }
 
@@ -76,6 +76,8 @@ func Start(c *cli.Context) {
 
 func handleConn(conn net.Conn, dlPool DownloaderPool) {
     defer conn.Close()
+
+    log(conn, "Incoming connection")
 
     in, out := common.MessageChannel(conn)
     msg, ok := <- in
@@ -143,6 +145,8 @@ func handleDownloader(conn net.Conn, dlPool DownloaderPool, in chan common.Messa
     var uid string
     var err error
 
+    log(conn, "Identified as downloader")
+
     dlPool.RLock()
 
     // Generate Uid.
@@ -169,6 +173,8 @@ func handleDownloader(conn net.Conn, dlPool DownloaderPool, in chan common.Messa
         Body:   []byte(uid),
     }
 
+    log(conn, "Sent UID")
+
     // Notify uploader(s), if any, of new downloader connection.
     dlPool.Incoming(Downloader{
         uid:  uid,
@@ -177,6 +183,9 @@ func handleDownloader(conn net.Conn, dlPool DownloaderPool, in chan common.Messa
 }
 
 func handleUploader(conn net.Conn, dlPool DownloaderPool, in chan common.Message, out chan common.Message) {
+    log(conn, "Identified as uploader")
+    log(conn, "Awaiting UID")
+
     msg, ok := <- in
 
     if ! ok {
@@ -215,6 +224,10 @@ func handleError(conn net.Conn, out chan common.Message, internal bool, format s
         Packet: packet,
         Body:   []byte(msg),
     }
+}
+
+func log(conn net.Conn, msg string) {
+    fmt.Fprintln(conn.RemoteAddr(), "--", msg)
 }
 
 func generateUid() (string, error) {
