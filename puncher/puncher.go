@@ -15,6 +15,9 @@ import (
 const (
     CertFileName = "puncher_cert.pem"
     KeyFileName  = "puncher_cert.key"
+
+    // UidLength is the length of the UID that the puncher server issues.
+    UidLength = 16
 )
 
 type args struct {
@@ -226,8 +229,8 @@ func handleUploader(conn net.Conn, in chan common.Message, out chan common.Messa
     logInfo(conn, "got uid")
 
     // Validate uid.
-    if len(uid) != common.UidLength {
-        handleError(conn, out, false, "invalid uid length (not %d), got '%s'", common.UidLength, uid)
+    if len(uid) != UidLength {
+        handleError(conn, out, false, "invalid uid length (not %d), got '%s'", UidLength, uid)
         return
     }
 
@@ -274,7 +277,7 @@ func logIncoming(conn net.Conn, msg ...string) {
 }
 
 func generateUid() (string, error) {
-    uidBuff := make([]byte, common.UidLength / 2) // 2 hex chars per byte
+    uidBuff := make([]byte, UidLength / 2) // 2 hex chars per byte
 
     if _, err := rand.Read(uidBuff); err != nil {
         return "", err
