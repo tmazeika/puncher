@@ -9,6 +9,7 @@ import (
     "github.com/codegangsta/cli"
     "crypto/tls"
     "crypto/rand"
+    "time"
 )
 
 const (
@@ -105,7 +106,7 @@ func handleConn(conn net.Conn) {
 type Downloader struct {
     uid       string
     conn      net.Conn
-    peerReady chan bool
+    peerReady chan int
 }
 
 type DownloaderPool struct {
@@ -115,7 +116,7 @@ type DownloaderPool struct {
 }
 
 func (p *DownloaderPool) Add(dl *Downloader) {
-    dl.peerReady = make(chan bool)
+    dl.peerReady = make(chan int)
 
     p.Lock()
     defer p.Unlock()
@@ -245,10 +246,20 @@ func handleDownloader(conn net.Conn, in chan common.Message, out chan common.Mes
     // Notify uploader(s), if any, of new downloader connection.
     incomingBroadcaster.Broadcast(dl)
 
-    var peerReady bool
-
-    for ! peerReady {
-        peerReady = <- dl.peerReady
+    select {
+    case time.After(time.Hour):
+        out <- common.Message{
+            Packet: common.Halt,
+            Body:   []string("timeout"),
+        }
+    case msg := <- in:
+        if msg.Packet == common.Halt {
+            logMessage(conn, "Halt:", string(msg.Body))
+        } else {
+            handleError(conn, out, false, "Expected halt, got 0x%x", msg)
+        }
+    case <- dl.peerReady:
+        out <- common.Message{ common.UploaderReady }
     }
 }
 
@@ -321,7 +332,7 @@ func handleUploader(conn net.Conn, in chan common.Message, out chan common.Messa
     }*/
 
     // Indicate to the downloader that the uploader is ready.
-    dl.peerReady <- true
+    dl.peerReady <- 0
 }
 
 func handleError(conn net.Conn, out chan common.Message, internal bool, format string, a ...interface{}) {
