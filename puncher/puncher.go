@@ -116,7 +116,20 @@ type Downloader struct {
 type DownloaderPool struct {
     sync.RWMutex
 
-    uidConnMap      map[string]net.Conn
+    downloaders []Downloader
+}
+
+func (p *DownloaderPool) Find(uid string) (dl *Downloader, exists bool) {
+    p.RLock()
+    defer p.RUnlock()
+
+    for _, d := range p.downloaders {
+        if d.uid == uid {
+            return d, true
+        }
+    }
+
+    return nil, false
 }
 
 type BroadcastListener struct {
@@ -183,7 +196,7 @@ func handleDownloader(conn net.Conn, dlPool DownloaderPool, in chan common.Messa
     dlPool.RLock()
 
     // Generate Uid.
-    for exists := true; exists; _, exists = dlPool.uidConnMap[uid] {
+    for exists := true; exists; _, exists = dlPool.downloaders[uid] {
         uid, err = generateUid()
 
         if err != nil {
@@ -246,8 +259,12 @@ func handleUploader(conn net.Conn, dlPool DownloaderPool, in chan common.Message
     dlConn, exists := dlPool.uidConnMap[uid]
     dlPool.RUnlock()
 
+    var dl Downloader
+
     // Otherwise, wait for a downloader.
-    if ! exists {
+    if exists {
+        for d := range
+    } else {
         incoming, claimed, cancel := incomingBroadcaster.Listen()
 
         ListeningLoop:
