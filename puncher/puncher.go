@@ -74,19 +74,19 @@ func Start(c *cli.Context) {
 func handleConn(conn net.Conn) {
     defer conn.Close()
 
-    logInfo(conn, "incoming connection")
+    common.LogInfo(conn, "incoming connection")
 
     in, out := common.MessageChannel(conn)
     msg, ok := <- in
 
     if ! ok {
-        handleError(conn, out, true, "closing connection")
+        common.HandleError(conn, out, true, "closing connection")
         return
     }
 
     // Expect ClientType message.
     if msg.Packet != common.ClientType {
-        handleError(conn, out, false, "expected client type, got 0x%x", msg)
+        common.HandleError(conn, out, false, "expected client type, got 0x%x", msg)
         return
     }
 
@@ -96,7 +96,7 @@ func handleConn(conn net.Conn) {
     case common.UploaderClientType:
         handleUploader(conn, in, out)
     default:
-        handleError(conn, out, true, "expected client type body to be uploader or downloader, got 0x%x", msg)
+        common.HandleError(conn, out, true, "expected client type body to be uploader or downloader, got 0x%x", msg)
     }
 }
 
@@ -154,7 +154,7 @@ func handleDownloader(conn net.Conn, in chan common.Message, out chan common.Mes
     var uid string
     var err error
 
-    logInfo(conn, "identified as downloader")
+    common.LogInfo(conn, "identified as downloader")
 
     dlPool.RLock()
 
@@ -164,7 +164,7 @@ func handleDownloader(conn net.Conn, in chan common.Message, out chan common.Mes
 
         if err != nil {
             dlPool.RUnlock()
-            handleError(conn, out, true, "error generating uid: %s", err)
+            common.HandleError(conn, out, true, "error generating uid: %s", err)
             return
         }
     }
@@ -182,7 +182,7 @@ func handleDownloader(conn net.Conn, in chan common.Message, out chan common.Mes
         Body:   []byte(uid),
     }
 
-    logInfo(conn, "sent uid")
+    common.LogInfo(conn, "sent uid")
 
     select {
     // Wait for timeout.
@@ -194,9 +194,9 @@ func handleDownloader(conn net.Conn, in chan common.Message, out chan common.Mes
     // Wait for incoming halt message.
     case msg := <- in:
         if msg.Packet == common.Halt {
-            logIncoming(conn, "halt:", string(msg.Body))
+            common.LogIncoming(conn, "halt:", string(msg.Body))
         } else {
-            handleError(conn, out, false, "expected halt, got 0x%x", msg)
+            common.HandleError(conn, out, false, "expected halt, got 0x%x", msg)
         }
     // Wait for a ready signal from the uploader.
     case <- dl.ready:
@@ -205,29 +205,29 @@ func handleDownloader(conn net.Conn, in chan common.Message, out chan common.Mes
 }
 
 func handleUploader(conn net.Conn, in chan common.Message, out chan common.Message) {
-    logInfo(conn, "identified as uploader")
-    logInfo(conn, "awaiting uid")
+    common.LogInfo(conn, "identified as uploader")
+    common.LogInfo(conn, "awaiting uid")
 
     msg, ok := <- in
 
     if ! ok {
-        handleError(conn, out, true, "closing connection")
+        common.HandleError(conn, out, true, "closing connection")
         return
     }
 
     // Expect uid.
     if msg.Packet != common.UidRequest {
-        handleError(conn, out, false, "expected uid, got 0x%x", msg)
+        common.HandleError(conn, out, false, "expected uid, got 0x%x", msg)
         return
     }
 
     uid := string(msg.Body)
 
-    logInfo(conn, "got uid")
+    common.LogInfo(conn, "got uid")
 
     // Validate uid.
     if len(uid) != common.UidLength {
-        handleError(conn, out, false, "invalid uid length (not %d), got '%s'", common.UidLength, uid)
+        common.HandleError(conn, out, false, "invalid uid length (not %d), got '%s'", common.UidLength, uid)
         return
     }
 
@@ -245,32 +245,6 @@ func handleUploader(conn net.Conn, in chan common.Message, out chan common.Messa
         out <- common.Message{ common.PeerNotFound, nil }
         return
     }
-}
-
-func handleError(conn net.Conn, out chan common.Message, internal bool, format string, a ...interface{}) {
-    var packet common.Packet
-    msg := fmt.Sprintf(format, a)
-
-    if internal {
-        packet = common.InternalError
-    } else {
-        packet = common.ProtocolError
-    }
-
-    fmt.Fprintln(os.Stderr, conn.RemoteAddr(), "<-", msg)
-
-    out <- common.Message{
-        Packet: packet,
-        Body:   []byte(msg),
-    }
-}
-
-func logInfo(conn net.Conn, msg ...string) {
-    fmt.Println(conn.RemoteAddr(), "--", msg)
-}
-
-func logIncoming(conn net.Conn, msg ...string) {
-    fmt.Println(conn.RemoteAddr(), "->", msg)
 }
 
 func generateUid() (string, error) {
