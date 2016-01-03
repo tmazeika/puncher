@@ -120,7 +120,9 @@ func handleConn(conn net.Conn) {
     }
 }
 
-type DownloaderPool
+type DownloaderPool struct {
+    downloaders []
+}
 
 func handleUploader(conn net.Conn, msgCh chan common.Message) {
     msg, ok := <- msgCh
