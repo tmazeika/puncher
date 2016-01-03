@@ -195,6 +195,7 @@ func handleDownloader(conn net.Conn, dlPool DownloaderPool, in chan common.Messa
         Body:   []byte(uid),
     }
 
+    // Notify uploader(s), if any, of new downloader connection.
     dlPool.Incoming(Downloader{
         uid:  uid,
         conn: conn,
