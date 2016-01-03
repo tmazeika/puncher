@@ -141,7 +141,9 @@ func handleDownloader(conn net.Conn, dlPool DownloaderPool, in chan common.Messa
     dlPool.Lock()
 
     // Generate Uid.
-    for _, ok := dlPool.uidConnMap[uid]; ! ok; uid, err = generateUid() {
+    for exists := true; exists; _, exists = dlPool.uidConnMap[uid] {
+        uid, err = generateUid()
+
         if err != nil {
             fmt.Fprintf("Error generating Uid for '%s': %s", conn.RemoteAddr(), err)
             dlPool.Unlock()
