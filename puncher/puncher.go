@@ -254,6 +254,8 @@ func handleUploader(conn net.Conn, dlPool DownloaderPool, in chan common.Message
             case msg := <- in:
                 if msg.Packet != common.Halt {
                     handleError(conn, out, false, "Only allowed halt, got 0x%x", msg)
+                } else {
+                    logMessage(conn, "Halt:", string(msg.Body))
                 }
 
                 cancel <- 0
@@ -288,8 +290,12 @@ func handleError(conn net.Conn, out chan common.Message, internal bool, format s
     }
 }
 
-func log(conn net.Conn, msg string) {
-    fmt.Fprintln(conn.RemoteAddr(), "--", msg)
+func log(conn net.Conn, msg ...string) {
+    fmt.Println(conn.RemoteAddr(), "--", msg)
+}
+
+func logMessage(conn net.Conn, msg ...string) {
+    fmt.Println(conn.RemoteAddr(), "->", msg)
 }
 
 func generateUid() (string, error) {
