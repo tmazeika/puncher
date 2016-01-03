@@ -234,14 +234,17 @@ func handleUploader(conn net.Conn, in chan common.Message, out chan common.Messa
     // See if the downloader is waiting.
     dl, waiting := dlPool.Find(uid)
 
-    if ! waiting {
+    if waiting {
+        // Indicate to the downloader that the uploader is ready.
+        dl.ready <- 0
+
+        // Tell the uploader that the downloader is ready.
+        out <- common.Message{ common.PeerReady, dl.conn.RemoteAddr() }
+    } else {
         // If not, the say that the peer was not found.
         out <- common.Message{ common.PeerNotFound, nil }
         return
     }
-
-    // Indicate to the downloader that the uploader is ready.
-    dl.ready <- 0
 }
 
 func handleError(conn net.Conn, out chan common.Message, internal bool, format string, a ...interface{}) {
