@@ -76,19 +76,19 @@ func Start(c *cli.Context) {
 func handleConn(conn net.Conn) {
     defer conn.Close()
 
-    logInfo(conn, "Incoming connection")
+    logInfo(conn, "incoming connection")
 
     in, out := common.MessageChannel(conn)
     msg, ok := <- in
 
     if ! ok {
-        handleError(conn, out, true, "Closing connection")
+        handleError(conn, out, true, "closing connection")
         return
     }
 
     // Expect ClientType message.
     if msg.Packet != common.ClientType {
-        handleError(conn, out, false, "Expected client type, got 0x%x", msg)
+        handleError(conn, out, false, "expected client type, got 0x%x", msg)
         return
     }
 
@@ -98,7 +98,7 @@ func handleConn(conn net.Conn) {
     case common.UploaderClientType:
         handleUploader(conn, in, out)
     default:
-        handleError(conn, out, true, "Expected client type body to be uploader or downloader, got 0x%x", msg)
+        handleError(conn, out, true, "expected client type body to be uploader or downloader, got 0x%x", msg)
         return
     }
 }
@@ -213,7 +213,7 @@ func handleDownloader(conn net.Conn, in chan common.Message, out chan common.Mes
     var uid string
     var err error
 
-    logInfo(conn, "Identified as downloader")
+    logInfo(conn, "identified as downloader")
 
     dlPool.RLock()
 
@@ -223,7 +223,7 @@ func handleDownloader(conn net.Conn, in chan common.Message, out chan common.Mes
 
         if err != nil {
             dlPool.RUnlock()
-            handleError(conn, out, true, "Error generating UID: %s", err)
+            handleError(conn, out, true, "error generating UID: %s", err)
             return
         }
     }
@@ -241,7 +241,7 @@ func handleDownloader(conn net.Conn, in chan common.Message, out chan common.Mes
         Body:   []byte(uid),
     }
 
-    logInfo(conn, "Sent UID")
+    logInfo(conn, "sent UID")
 
     // Notify uploader(s), if any, of new downloader connection.
     incomingBroadcaster.Broadcast(dl)
@@ -254,9 +254,9 @@ func handleDownloader(conn net.Conn, in chan common.Message, out chan common.Mes
         }
     case msg := <- in:
         if msg.Packet == common.Halt {
-            logMessage(conn, "Halt:", string(msg.Body))
+            logMessage(conn, "halt:", string(msg.Body))
         } else {
-            handleError(conn, out, false, "Expected halt, got 0x%x", msg)
+            handleError(conn, out, false, "expected halt, got 0x%x", msg)
         }
     case <- dl.peerReady:
         out <- common.Message{ common.UploaderReady }
@@ -264,29 +264,29 @@ func handleDownloader(conn net.Conn, in chan common.Message, out chan common.Mes
 }
 
 func handleUploader(conn net.Conn, in chan common.Message, out chan common.Message) {
-    logInfo(conn, "Identified as uploader")
-    logInfo(conn, "Awaiting UID")
+    logInfo(conn, "identified as uploader")
+    logInfo(conn, "awaiting UID")
 
     msg, ok := <- in
 
     if ! ok {
-        handleError(conn, out, true, "Closing connection")
+        handleError(conn, out, true, "closing connection")
         return
     }
 
     // Expect Uid.
     if msg.Packet != common.UidRequest {
-        handleError(conn, out, false, "Expected UID, got 0x%x", msg)
+        handleError(conn, out, false, "expected UID, got 0x%x", msg)
         return
     }
 
     uid := string(msg.Body)
 
-    logInfo("Got UID")
+    logInfo("got UID")
 
     // Validate Uid.
     if len(uid) != common.UidLength {
-        handleError(conn, out, false, "Invalid UID length (not %d), got '%s'", common.UidLength, uid)
+        handleError(conn, out, false, "invalid UID length (not %d), got '%s'", common.UidLength, uid)
         return
     }
 
