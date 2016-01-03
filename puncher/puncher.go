@@ -194,7 +194,7 @@ func handleDownloader(conn net.Conn, in chan common.Message, out chan common.Mes
     // Wait for incoming halt message.
     case msg := <- in:
         if msg.Packet == common.Halt {
-            logMessage(conn, "halt:", string(msg.Body))
+            logIncoming(conn, "halt:", string(msg.Body))
         } else {
             handleError(conn, out, false, "expected halt, got 0x%x", msg)
         }
@@ -269,7 +269,7 @@ func logInfo(conn net.Conn, msg ...string) {
     fmt.Println(conn.RemoteAddr(), "--", msg)
 }
 
-func logMessage(conn net.Conn, msg ...string) {
+func logIncoming(conn net.Conn, msg ...string) {
     fmt.Println(conn.RemoteAddr(), "->", msg)
 }
 
