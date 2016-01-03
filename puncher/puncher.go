@@ -149,65 +149,9 @@ func (p *DownloaderPool) Remove(dl *Downloader) {
     }
 }
 
-type BroadcastListener struct {
-    incoming chan Downloader
-    claimed  chan bool
-    cancel   chan int
-}
-
-type Broadcaster struct {
-    sync.RWMutex
-
-    listeners []BroadcastListener
-}
-
 var (
     dlPool = DownloaderPool{}
-    incomingBroadcaster = Broadcaster{}
 )
-
-func (b *Broadcaster) Listen() (incoming chan Downloader, claimed chan bool, cancel chan int) {
-    incoming = make(chan Downloader)
-    claimed = make(chan bool)
-    cancel = make(chan int)
-
-    listener := BroadcastListener{
-        incoming,
-        claimed,
-        cancel,
-    }
-
-    b.Lock()
-    b.listeners = append(b.listeners, listener)
-    b.Unlock()
-
-    go b.handleListenerCancel(listener)
-
-    return
-}
-
-func (b *Broadcaster) Broadcast(dl *Downloader) {
-    for _, l := range b.listeners {
-        l.incoming <- dl
-
-        if <- l.claimed {
-            l.cancel <- 0
-            return
-        }
-    }
-
-    // If no uploaders were waiting for the downloader, add the downloader to
-    // the pool to be claimed in the future.
-    dlPool.Add(dl)
-}
-
-func (b *Broadcaster) handleListenerCancel(listener BroadcastListener) {
-    <- listener.cancel
-
-    b.Lock()
-    delete(b.listeners, listener)
-    b.Unlock()
-}
 
 func handleDownloader(conn net.Conn, in chan common.Message, out chan common.Message) {
     var uid string
@@ -242,9 +186,6 @@ func handleDownloader(conn net.Conn, in chan common.Message, out chan common.Mes
     }
 
     logInfo(conn, "sent UID")
-
-    // Notify uploader(s), if any, of new downloader connection.
-    incomingBroadcaster.Broadcast(dl)
 
     select {
     case time.After(time.Hour):
@@ -297,39 +238,6 @@ func handleUploader(conn net.Conn, in chan common.Message, out chan common.Messa
         out <- common.Message{ common.PeerNotFound }
         return
     }
-
-    // Otherwise, wait for a downloader.
-    /*if ! exists {
-        incoming, claimed, cancel := incomingBroadcaster.Listen()
-
-        ListeningLoop:
-        for {
-            select {
-            case msg := <- in:
-                cancel <- 0
-
-                // Indicate to the downloader that the uploader is no longer
-                // ready.
-                dl.peerReady <- false
-
-                if msg.Packet != common.Halt {
-                    handleError(conn, out, false, "Only allowed halt, got 0x%x", msg)
-                } else {
-                    logMessage(conn, "Halt:", string(msg.Body))
-                }
-
-                return
-            case incomingDl := <- incoming:
-                if incomingDl.uid == uid {
-                    claimed <- true
-                    dl = incomingDl
-                    break ListeningLoop
-                } else {
-                    claimed <- false
-                }
-            }
-        }
-    }*/
 
     // Indicate to the downloader that the uploader is ready.
     dl.peerReady <- 0
