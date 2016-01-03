@@ -16,14 +16,14 @@ const (
     KeyFileName = "puncher_cert.key"
 )
 
-type downloader struct {
+/*type downloader struct {
     conn       net.Conn
     ready      bool
     readyCh    chan int
     responseCh chan bool
 }
 
-type uidConnMap map[string]downloader
+type uidConnMap map[string]downloader*/
 
 type args struct {
     port   string
@@ -104,9 +104,8 @@ func Start(c *cli.Context) {
 func handleConn(conn net.Conn) {
     defer conn.Close()
 
-    msgCh := common.MessageChannel(conn)
-
-    msg, ok := <- msgCh
+    in, out := common.MessageChannel(conn)
+    msg, ok := <- in
 
     if ! ok {
         fmt.Printf("Closing connection with '%s'\n", conn.RemoteAddr())
@@ -123,7 +122,7 @@ func handleConn(conn net.Conn) {
     case common.DownloaderClientType:
         // TODO: handleDownloader(...)
     case common.UploaderClientType:
-        handleUploader(conn, msgCh)
+        handleUploader(conn, in, out)
     default:
         fmt.Fprintf(os.Stderr, "Expected ClientType body from '%s', got ox%x\n", conn.RemoteAddr(), msg)
         return
@@ -134,8 +133,12 @@ type DownloaderPool struct {
     downloaders []
 }
 
-func handleUploader(conn net.Conn, msgCh chan common.Message) {
-    msg, ok := <- msgCh
+func handleDownloader(conn net.Conn, in chan common.Message, out chan common.Message) {
+
+}
+
+func handleUploader(conn net.Conn, in chan common.Message, out chan common.Message) {
+    msg, ok := <- in
 
     if ! ok {
         fmt.Printf("Closing connection with '%s'\n", conn.RemoteAddr())
