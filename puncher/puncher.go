@@ -252,13 +252,15 @@ func handleUploader(conn net.Conn, dlPool DownloaderPool, in chan common.Message
         for {
             select {
             case msg := <- in:
+                cancel <- 0
+
                 if msg.Packet != common.Halt {
                     handleError(conn, out, false, "Only allowed halt, got 0x%x", msg)
                 } else {
                     logMessage(conn, "Halt:", string(msg.Body))
                 }
 
-                cancel <- 0
+                return
             case dl := <- incoming:
                 if dl.uid == uid {
                     claimed <- true
