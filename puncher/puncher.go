@@ -149,6 +149,12 @@ func handleUploader(conn net.Conn, msgCh chan common.Message) {
     }
 
     uid := string(msg.Body)
+
+    // Validate Uid.
+    if len(uid) != common.UidLength {
+        fmt.Fprintf(os.Stderr, "Received invalid Uid from '%s', got '%s'\n", conn.RemoteAddr(), uid)
+        return
+    }
 }
 
 /*func uidExists(downloaders uidConnMap, uid string) bool {
