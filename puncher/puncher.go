@@ -80,6 +80,8 @@ func handleConn(conn net.Conn) {
     logInfo(conn, "incoming connection")
 
     in, out := common.MessageChannel(conn)
+
+    // Expect ClientType message.
     msg, ok := <- in
 
     if ! ok {
@@ -87,19 +89,13 @@ func handleConn(conn net.Conn) {
         return
     }
 
-    // Expect ClientType message.
-    if msg.Packet != common.ClientType {
-        handleError(conn, out, false, "expected client type, got 0x%x", msg.Packet)
-        return
-    }
-
-    switch common.ClientTypeBody(msg.Body[0]) {
-    case common.DownloaderClientType:
+    switch msg.Packet {
+    case common.Downloader:
         handleDownloader(conn, in, out)
-    case common.UploaderClientType:
+    case common.Uploader:
         handleUploader(conn, in, out)
     default:
-        handleError(conn, out, true, "expected client type body to be uploader or downloader, got 0x%x", msg.Packet)
+        handleError(conn, out, true, "expected client type to be uploader or downloader, got 0x%x", msg.Packet)
     }
 }
 
