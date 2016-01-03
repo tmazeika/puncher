@@ -103,8 +103,9 @@ func handleConn(conn net.Conn) {
 }
 
 type Downloader struct {
-    uid     string
-    conn    net.Conn
+    uid       string
+    conn      net.Conn
+    peerReady chan bool
 }
 
 type DownloaderPool struct {
@@ -114,6 +115,8 @@ type DownloaderPool struct {
 }
 
 func (p *DownloaderPool) Add(dl *Downloader) {
+    dl.peerReady = make(chan bool)
+
     p.Lock()
     defer p.Unlock()
 
@@ -131,6 +134,18 @@ func (p *DownloaderPool) Find(uid string) (dl *Downloader, exists bool) {
     }
 
     return nil, false
+}
+
+func (p *DownloaderPool) Remove(dl *Downloader) {
+    p.Lock()
+    defer p.Unlock()
+
+    for i, d := range p.downloaders {
+        if d.uid == dl.uid {
+            p.downloaders = append(p.downloaders[:i], p.downloaders[i + 1:]...)
+            break
+        }
+    }
 }
 
 type BroadcastListener struct {
@@ -170,9 +185,9 @@ func (b *Broadcaster) Listen() (incoming chan Downloader, claimed chan bool, can
     return
 }
 
-func (b *Broadcaster) Broadcast(d Downloader) {
+func (b *Broadcaster) Broadcast(dl *Downloader) {
     for _, l := range b.listeners {
-        l.incoming <- d
+        l.incoming <- dl
 
         if <- l.claimed {
             l.cancel <- 0
@@ -180,7 +195,9 @@ func (b *Broadcaster) Broadcast(d Downloader) {
         }
     }
 
-
+    // If no uploaders were waiting for the downloader, add the downloader to
+    // the pool to be claimed in the future.
+    dlPool.Add(dl)
 }
 
 func (b *Broadcaster) handleListenerCancel(listener BroadcastListener) {
@@ -212,12 +229,10 @@ func handleDownloader(conn net.Conn, in chan common.Message, out chan common.Mes
 
     dlPool.RUnlock()
 
-    dl := Downloader{
-        uid,
-        conn,
-    }
+    dl := Downloader{ uid, conn }
 
     dlPool.Add(dl)
+    defer dlPool.Remove(dl)
 
     // Send Uid.
     out <- common.Message{
@@ -229,6 +244,12 @@ func handleDownloader(conn net.Conn, in chan common.Message, out chan common.Mes
 
     // Notify uploader(s), if any, of new downloader connection.
     incomingBroadcaster.Broadcast(dl)
+
+    var peerReady bool
+
+    for ! peerReady {
+        peerReady = <- dl.peerReady
+    }
 }
 
 func handleUploader(conn net.Conn, in chan common.Message, out chan common.Message) {
@@ -261,8 +282,13 @@ func handleUploader(conn net.Conn, in chan common.Message, out chan common.Messa
     // See if downloader is waiting.
     dl, exists := dlPool.Find(uid)
 
-    // Otherwise, wait for a downloader.
     if ! exists {
+        out <- common.Message{ common.PeerNotFound }
+        return
+    }
+
+    // Otherwise, wait for a downloader.
+    /*if ! exists {
         incoming, claimed, cancel := incomingBroadcaster.Listen()
 
         ListeningLoop:
@@ -270,6 +296,10 @@ func handleUploader(conn net.Conn, in chan common.Message, out chan common.Messa
             select {
             case msg := <- in:
                 cancel <- 0
+
+                // Indicate to the downloader that the uploader is no longer
+                // ready.
+                dl.peerReady <- false
 
                 if msg.Packet != common.Halt {
                     handleError(conn, out, false, "Only allowed halt, got 0x%x", msg)
@@ -288,7 +318,10 @@ func handleUploader(conn net.Conn, in chan common.Message, out chan common.Messa
                 }
             }
         }
-    }
+    }*/
+
+    // Indicate to the downloader that the uploader is ready.
+    dl.peerReady <- true
 }
 
 func handleError(conn net.Conn, out chan common.Message, internal bool, format string, a ...interface{}) {
