@@ -206,7 +206,7 @@ func handleDownloader(conn net.Conn, in chan common.Message, out chan common.Mes
 
 func handleUploader(conn net.Conn, in chan common.Message, out chan common.Message) {
     logInfo(conn, "identified as uploader")
-    logInfo(conn, "awaiting UID")
+    logInfo(conn, "awaiting uid")
 
     msg, ok := <- in
 
@@ -231,10 +231,11 @@ func handleUploader(conn net.Conn, in chan common.Message, out chan common.Messa
         return
     }
 
-    // See if downloader is waiting.
+    // See if the downloader is waiting.
     dl, waiting := dlPool.Find(uid)
 
     if ! waiting {
+        // If not, the say that the peer was not found.
         out <- common.Message{ common.PeerNotFound }
         return
     }
