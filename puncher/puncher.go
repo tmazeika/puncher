@@ -233,6 +233,8 @@ func handleUploader(conn net.Conn, dlPool DownloaderPool, in chan common.Message
 
     uid := string(msg.Body)
 
+    logInfo("Got UID")
+
     // Validate Uid.
     if len(uid) != common.UidLength {
         handleError(conn, out, false, "Invalid UID length (not %d), got '%s'", common.UidLength, uid)
