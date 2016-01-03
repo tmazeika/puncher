@@ -97,7 +97,6 @@ func handleConn(conn net.Conn) {
         handleUploader(conn, in, out)
     default:
         handleError(conn, out, true, "expected client type body to be uploader or downloader, got 0x%x", msg)
-        return
     }
 }
 
