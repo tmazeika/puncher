@@ -102,9 +102,9 @@ func handleConn(conn net.Conn) {
 }
 
 type Downloader struct {
-    uid       string
-    conn      net.Conn
-    peerReady chan int
+    uid   string
+    conn  net.Conn
+    ready chan int
 }
 
 type DownloaderPool struct {
@@ -114,7 +114,7 @@ type DownloaderPool struct {
 }
 
 func (p *DownloaderPool) Add(dl *Downloader) {
-    dl.peerReady = make(chan int)
+    dl.ready = make(chan int)
 
     p.Lock()
     defer p.Unlock()
@@ -197,7 +197,7 @@ func handleDownloader(conn net.Conn, in chan common.Message, out chan common.Mes
         } else {
             handleError(conn, out, false, "expected halt, got 0x%x", msg)
         }
-    case <- dl.peerReady:
+    case <- dl.ready:
         out <- common.Message{ common.UploaderReady }
     }
 }
@@ -238,7 +238,7 @@ func handleUploader(conn net.Conn, in chan common.Message, out chan common.Messa
     }
 
     // Indicate to the downloader that the uploader is ready.
-    dl.peerReady <- 0
+    dl.ready <- 0
 }
 
 func handleError(conn net.Conn, out chan common.Message, internal bool, format string, a ...interface{}) {
