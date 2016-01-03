@@ -78,7 +78,7 @@ func Start(c *cli.Context) {
 func handleConn(conn net.Conn, dlPool DownloaderPool) {
     defer conn.Close()
 
-    log(conn, "Incoming connection")
+    logInfo(conn, "Incoming connection")
 
     in, out := common.MessageChannel(conn)
     msg, ok := <- in
@@ -178,7 +178,7 @@ func handleDownloader(conn net.Conn, dlPool DownloaderPool, in chan common.Messa
     var uid string
     var err error
 
-    log(conn, "Identified as downloader")
+    logInfo(conn, "Identified as downloader")
 
     dlPool.RLock()
 
@@ -205,7 +205,7 @@ func handleDownloader(conn net.Conn, dlPool DownloaderPool, in chan common.Messa
         Body:   []byte(uid),
     }
 
-    log(conn, "Sent UID")
+    logInfo(conn, "Sent UID")
 
     // Notify uploader(s), if any, of new downloader connection.
     incomingBroadcaster.Broadcast(Downloader{
@@ -215,8 +215,8 @@ func handleDownloader(conn net.Conn, dlPool DownloaderPool, in chan common.Messa
 }
 
 func handleUploader(conn net.Conn, dlPool DownloaderPool, in chan common.Message, out chan common.Message) {
-    log(conn, "Identified as uploader")
-    log(conn, "Awaiting UID")
+    logInfo(conn, "Identified as uploader")
+    logInfo(conn, "Awaiting UID")
 
     msg, ok := <- in
 
@@ -292,7 +292,7 @@ func handleError(conn net.Conn, out chan common.Message, internal bool, format s
     }
 }
 
-func log(conn net.Conn, msg ...string) {
+func logInfo(conn net.Conn, msg ...string) {
     fmt.Println(conn.RemoteAddr(), "--", msg)
 }
 
