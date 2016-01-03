@@ -14,7 +14,7 @@ import (
 
 const (
     CertFileName = "puncher_cert.pem"
-    KeyFileName = "puncher_cert.key"
+    KeyFileName  = "puncher_cert.key"
 )
 
 type args struct {
