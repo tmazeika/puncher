@@ -128,28 +128,64 @@ func handleConn(conn net.Conn, dlPool DownloaderPool) {
     }
 }
 
-type DownloaderPool struct {
-    sync.Mutex
+type Downloader struct {
+    sync.RWMutex
 
-    uidConnMap map[string]net.Conn
+    uid     string
+    conn    net.Conn
+    claimed bool
+}
+
+type DownloaderPool struct {
+    sync.RWMutex
+
+    subscriptions []chan Downloader
+    uidConnMap    map[string]net.Conn
+}
+
+func (d *DownloaderPool) Subscribe() (ch chan Downloader) {
+    ch = make(chan Downloader)
+    d.subscriptions = append(d.subscriptions, ch)
+
+    return
+}
+
+func (d DownloaderPool) Incoming(dl Downloader) {
+    d.Lock()
+
+    d.uidConnMap[dl.uid] = dl.conn
+
+    d.Unlock()
+
+    for ch := range d.subscriptions {
+        select {
+        case ch <- dl:
+        default:
+        }
+    }
 }
 
 func handleDownloader(conn net.Conn, dlPool DownloaderPool, in chan common.Message, out chan common.Message) {
     var uid string
     var err error
 
-    dlPool.Lock()
+    dlPool.RLock()
 
     // Generate Uid.
     for exists := true; exists; _, exists = dlPool.uidConnMap[uid] {
         uid, err = generateUid()
 
         if err != nil {
-            fmt.Fprintf("Error generating Uid for '%s': %s", conn.RemoteAddr(), err)
-            dlPool.Unlock()
+            handleError(conn, out, true, "Error generating UID: %s", err)
+            dlPool.RUnlock()
             return
         }
     }
+
+    dlPool.RUnlock()
+    dlPool.Lock()
+
+    dlPool.uidConnMap[uid] = conn
 
     dlPool.Unlock()
 
@@ -158,19 +194,24 @@ func handleDownloader(conn net.Conn, dlPool DownloaderPool, in chan common.Messa
         Packet: common.UidAssignment,
         Body:   []byte(uid),
     }
+
+    dlPool.Incoming(Downloader{
+        uid:  uid,
+        conn: conn,
+    })
 }
 
 func handleUploader(conn net.Conn, dlPool DownloaderPool, in chan common.Message, out chan common.Message) {
     msg, ok := <- in
 
     if ! ok {
-        fmt.Printf("Closing connection with '%s'\n", conn.RemoteAddr())
+        handleError(conn, out, true, "Closing connection")
         return
     }
 
     // Expect Uid.
     if msg.Packet != common.UidRequest {
-        fmt.Fprintf(os.Stderr, "Expected Uid message from '%s', got 0x%x\n", conn.RemoteAddr(), msg)
+        handleError(conn, out, false, "Expected UID, got 0x%x", msg)
         return
     }
 
@@ -178,8 +219,26 @@ func handleUploader(conn net.Conn, dlPool DownloaderPool, in chan common.Message
 
     // Validate Uid.
     if len(uid) != common.UidLength {
-        fmt.Fprintf(os.Stderr, "Received invalid Uid from '%s', got '%s'\n", conn.RemoteAddr(), uid)
+        handleError(conn, out, false, "Invalid UID, got '%s'", uid)
         return
+    }
+}
+
+func handleError(conn net.Conn, out chan common.Message, internal bool, format string, a ...interface{}) {
+    var packet common.Packet
+    msg := fmt.Sprintf(format, a)
+
+    if internal {
+        packet = common.InternalError
+    } else {
+        packet = common.ProtocolError
+    }
+
+    fmt.Fprintln(os.Stderr, conn.RemoteAddr(), msg)
+
+    out <- common.Message{
+        Packet: packet,
+        Body:   []byte(msg),
     }
 }
 
