@@ -71,23 +71,6 @@ func Start(c *cli.Context) {
         }
 
         go handleConn(conn, dlPool)
-
-        /*go func() {
-            clientTypeBuffer := make([]byte, 1)
-
-            conn.Read(clientTypeBuffer)
-
-            clientType := common.ProtocolMessage(clientTypeBuffer[0])
-
-            switch clientType {
-            case common.DownloadClientType:
-                handleDownloader(conn, downloaders, downloadersMutex)
-            case common.UploadClientType:
-                handleUploader(conn, downloaders, downloadersMutex)
-            default:
-                fmt.Fprintf(os.Stderr, "Protocol error from '%s': expected client type, got 0x%X\n", conn.RemoteAddr().String(), clientType)
-            }
-        }()*/
     }
 }
 
