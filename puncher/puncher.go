@@ -223,7 +223,7 @@ func handleUploader(conn net.Conn, in chan common.Message, out chan common.Messa
 
     uid := string(msg.Body)
 
-    logInfo("got UID")
+    logInfo("got uid")
 
     // Validate uid.
     if len(uid) != common.UidLength {
