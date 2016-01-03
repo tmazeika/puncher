@@ -58,8 +58,6 @@ func Start(c *cli.Context) {
     }
 
     fmt.Printf("Listening on port %s\n", args.port)
-    // TODO: uncomment for release
-    //rand.Seed(int64(time.Now().Nanosecond()))
 
     for {
         conn, err := listener.Accept()
