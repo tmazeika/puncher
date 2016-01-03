@@ -86,7 +86,7 @@ func handleConn(conn net.Conn) {
 
     // Expect ClientType message.
     if msg.Packet != common.ClientType {
-        common.HandleError(conn, out, false, "expected client type, got 0x%x", msg)
+        common.HandleError(conn, out, false, "expected client type, got 0x%x", msg.Packet)
         return
     }
 
@@ -96,7 +96,7 @@ func handleConn(conn net.Conn) {
     case common.UploaderClientType:
         handleUploader(conn, in, out)
     default:
-        common.HandleError(conn, out, true, "expected client type body to be uploader or downloader, got 0x%x", msg)
+        common.HandleError(conn, out, true, "expected client type body to be uploader or downloader, got 0x%x", msg.Packet)
     }
 }
 
@@ -196,7 +196,7 @@ func handleDownloader(conn net.Conn, in chan common.Message, out chan common.Mes
         if msg.Packet == common.Halt {
             common.LogIncoming(conn, "halt:", string(msg.Body))
         } else {
-            common.HandleError(conn, out, false, "expected halt, got 0x%x", msg)
+            common.HandleError(conn, out, false, "expected halt, got 0x%x", msg.Packet)
         }
     // Wait for a ready signal from the uploader.
     case <- dl.ready:
@@ -217,7 +217,7 @@ func handleUploader(conn net.Conn, in chan common.Message, out chan common.Messa
 
     // Expect uid.
     if msg.Packet != common.UidRequest {
-        common.HandleError(conn, out, false, "expected uid, got 0x%x", msg)
+        common.HandleError(conn, out, false, "expected uid, got 0x%x", msg.Packet)
         return
     }
 
