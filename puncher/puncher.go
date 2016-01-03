@@ -159,13 +159,13 @@ func handleDownloader(conn net.Conn, in chan common.Message, out chan common.Mes
 
     dlPool.RLock()
 
-    // Generate Uid.
+    // Generate uid.
     for exists := true; exists; _, exists = dlPool.Find(uid) {
         uid, err = generateUid()
 
         if err != nil {
             dlPool.RUnlock()
-            handleError(conn, out, true, "error generating UID: %s", err)
+            handleError(conn, out, true, "error generating uid: %s", err)
             return
         }
     }
@@ -177,26 +177,29 @@ func handleDownloader(conn net.Conn, in chan common.Message, out chan common.Mes
     dlPool.Add(dl)
     defer dlPool.Remove(dl)
 
-    // Send Uid.
+    // Send uid.
     out <- common.Message{
         Packet: common.UidAssignment,
         Body:   []byte(uid),
     }
 
-    logInfo(conn, "sent UID")
+    logInfo(conn, "sent uid")
 
     select {
+    // Wait for timeout.
     case time.After(time.Hour):
         out <- common.Message{
             Packet: common.Halt,
             Body:   []string("timeout"),
         }
+    // Wait for incoming halt message.
     case msg := <- in:
         if msg.Packet == common.Halt {
             logMessage(conn, "halt:", string(msg.Body))
         } else {
             handleError(conn, out, false, "expected halt, got 0x%x", msg)
         }
+    // Wait for a ready signal from the uploader.
     case <- dl.ready:
         out <- common.Message{ common.UploaderReady }
     }
@@ -213,9 +216,9 @@ func handleUploader(conn net.Conn, in chan common.Message, out chan common.Messa
         return
     }
 
-    // Expect Uid.
+    // Expect uid.
     if msg.Packet != common.UidRequest {
-        handleError(conn, out, false, "expected UID, got 0x%x", msg)
+        handleError(conn, out, false, "expected uid, got 0x%x", msg)
         return
     }
 
@@ -223,9 +226,9 @@ func handleUploader(conn net.Conn, in chan common.Message, out chan common.Messa
 
     logInfo("got UID")
 
-    // Validate Uid.
+    // Validate uid.
     if len(uid) != common.UidLength {
-        handleError(conn, out, false, "invalid UID length (not %d), got '%s'", common.UidLength, uid)
+        handleError(conn, out, false, "invalid uid length (not %d), got '%s'", common.UidLength, uid)
         return
     }
 
