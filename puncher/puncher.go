@@ -280,9 +280,9 @@ func handleUploader(conn net.Conn, in chan common.Message, out chan common.Messa
     }
 
     // See if downloader is waiting.
-    dl, exists := dlPool.Find(uid)
+    dl, waiting := dlPool.Find(uid)
 
-    if ! exists {
+    if ! waiting {
         out <- common.Message{ common.PeerNotFound }
         return
     }
