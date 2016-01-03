@@ -90,7 +90,7 @@ func handleConn(conn net.Conn) {
         return
     }
 
-    switch common.ClientType(msg.Body[0]) {
+    switch common.ClientTypeBody(msg.Body[0]) {
     case common.DownloaderClientType:
         handleDownloader(conn, in, out)
     case common.UploaderClientType:
@@ -118,7 +118,7 @@ func (p *DownloaderPool) Add(dl *Downloader) {
     p.Lock()
     defer p.Unlock()
 
-    p.downloaders = append(p.downloaders, dl)
+    p.downloaders = append(p.downloaders, *dl)
 }
 
 func (p *DownloaderPool) Find(uid string) (dl *Downloader, exists bool) {
@@ -127,7 +127,7 @@ func (p *DownloaderPool) Find(uid string) (dl *Downloader, exists bool) {
 
     for _, d := range p.downloaders {
         if d.uid == uid {
-            return d, true
+            return &d, true
         }
     }
 
@@ -171,7 +171,7 @@ func handleDownloader(conn net.Conn, in chan common.Message, out chan common.Mes
 
     dlPool.RUnlock()
 
-    dl := Downloader{ uid, conn }
+    dl := &Downloader{ uid, conn, nil }
 
     dlPool.Add(dl)
     defer dlPool.Remove(dl)
@@ -186,10 +186,10 @@ func handleDownloader(conn net.Conn, in chan common.Message, out chan common.Mes
 
     select {
     // Wait for timeout.
-    case time.After(time.Hour):
+    case <- time.After(time.Hour):
         out <- common.Message{
             Packet: common.Halt,
-            Body:   []string("timeout"),
+            Body:   []byte("timeout"),
         }
     // Wait for incoming halt message.
     case msg := <- in:
@@ -200,7 +200,7 @@ func handleDownloader(conn net.Conn, in chan common.Message, out chan common.Mes
         }
     // Wait for a ready signal from the uploader.
     case <- dl.ready:
-        out <- common.Message{ common.UploaderReady }
+        out <- common.Message{ common.UploaderReady, nil }
     }
 }
 
@@ -223,7 +223,7 @@ func handleUploader(conn net.Conn, in chan common.Message, out chan common.Messa
 
     uid := string(msg.Body)
 
-    logInfo("got uid")
+    logInfo(conn, "got uid")
 
     // Validate uid.
     if len(uid) != common.UidLength {
@@ -236,7 +236,7 @@ func handleUploader(conn net.Conn, in chan common.Message, out chan common.Messa
 
     if ! waiting {
         // If not, the say that the peer was not found.
-        out <- common.Message{ common.PeerNotFound }
+        out <- common.Message{ common.PeerNotFound, nil }
         return
     }
 
@@ -277,5 +277,5 @@ func generateUid() (string, error) {
         return "", err
     }
 
-    return fmt.Sprintf("%x", uidBuff)
+    return fmt.Sprintf("%x", uidBuff), nil
 }
