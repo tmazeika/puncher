@@ -9,7 +9,6 @@ import (
     "github.com/codegangsta/cli"
     "crypto/tls"
     "crypto/rand"
-    "time"
 )
 
 const (
@@ -61,8 +60,6 @@ func Start(c *cli.Context) {
     // TODO: uncomment for release
     //rand.Seed(int64(time.Now().Nanosecond()))
 
-    dlPool := DownloaderPool{}
-
     for {
         conn, err := listener.Accept()
 
@@ -71,11 +68,11 @@ func Start(c *cli.Context) {
             continue
         }
 
-        go handleConn(conn, dlPool)
+        go handleConn(conn)
     }
 }
 
-func handleConn(conn net.Conn, dlPool DownloaderPool) {
+func handleConn(conn net.Conn) {
     defer conn.Close()
 
     logInfo(conn, "Incoming connection")
@@ -96,9 +93,9 @@ func handleConn(conn net.Conn, dlPool DownloaderPool) {
 
     switch common.ClientType(msg.Body[0]) {
     case common.DownloaderClientType:
-        handleDownloader(conn, dlPool, in, out)
+        handleDownloader(conn, in, out)
     case common.UploaderClientType:
-        handleUploader(conn, dlPool, in, out)
+        handleUploader(conn, in, out)
     default:
         handleError(conn, out, true, "Expected client type body to be uploader or downloader, got 0x%x", msg)
         return
@@ -106,17 +103,21 @@ func handleConn(conn net.Conn, dlPool DownloaderPool) {
 }
 
 type Downloader struct {
-    sync.RWMutex
-
     uid     string
     conn    net.Conn
-    claimed bool
 }
 
 type DownloaderPool struct {
     sync.RWMutex
 
     downloaders []Downloader
+}
+
+func (p *DownloaderPool) Add(dl *Downloader) {
+    p.Lock()
+    defer p.Unlock()
+
+    p.downloaders = append(p.downloaders, dl)
 }
 
 func (p *DownloaderPool) Find(uid string) (dl *Downloader, exists bool) {
@@ -145,6 +146,7 @@ type Broadcaster struct {
 }
 
 var (
+    dlPool = DownloaderPool{}
     incomingBroadcaster = Broadcaster{}
 )
 
@@ -174,9 +176,11 @@ func (b *Broadcaster) Broadcast(d Downloader) {
 
         if <- l.claimed {
             l.cancel <- 0
-            break
+            return
         }
     }
+
+
 }
 
 func (b *Broadcaster) handleListenerCancel(listener BroadcastListener) {
@@ -187,7 +191,7 @@ func (b *Broadcaster) handleListenerCancel(listener BroadcastListener) {
     b.Unlock()
 }
 
-func handleDownloader(conn net.Conn, dlPool DownloaderPool, in chan common.Message, out chan common.Message) {
+func handleDownloader(conn net.Conn, in chan common.Message, out chan common.Message) {
     var uid string
     var err error
 
@@ -196,7 +200,7 @@ func handleDownloader(conn net.Conn, dlPool DownloaderPool, in chan common.Messa
     dlPool.RLock()
 
     // Generate Uid.
-    for exists := true; exists; _, exists = dlPool.downloaders[uid] {
+    for exists := true; exists; _, exists = dlPool.Find(uid) {
         uid, err = generateUid()
 
         if err != nil {
@@ -208,9 +212,12 @@ func handleDownloader(conn net.Conn, dlPool DownloaderPool, in chan common.Messa
 
     dlPool.RUnlock()
 
-    dlPool.Lock()
-    dlPool.uidConnMap[uid] = conn
-    dlPool.Unlock()
+    dl := Downloader{
+        uid,
+        conn,
+    }
+
+    dlPool.Add(dl)
 
     // Send Uid.
     out <- common.Message{
@@ -221,13 +228,10 @@ func handleDownloader(conn net.Conn, dlPool DownloaderPool, in chan common.Messa
     logInfo(conn, "Sent UID")
 
     // Notify uploader(s), if any, of new downloader connection.
-    incomingBroadcaster.Broadcast(Downloader{
-        uid,
-        conn,
-    })
+    incomingBroadcaster.Broadcast(dl)
 }
 
-func handleUploader(conn net.Conn, dlPool DownloaderPool, in chan common.Message, out chan common.Message) {
+func handleUploader(conn net.Conn, in chan common.Message, out chan common.Message) {
     logInfo(conn, "Identified as uploader")
     logInfo(conn, "Awaiting UID")
 
@@ -255,16 +259,10 @@ func handleUploader(conn net.Conn, dlPool DownloaderPool, in chan common.Message
     }
 
     // See if downloader is waiting.
-    dlPool.RLock()
-    dlConn, exists := dlPool.uidConnMap[uid]
-    dlPool.RUnlock()
-
-    var dl Downloader
+    dl, exists := dlPool.Find(uid)
 
     // Otherwise, wait for a downloader.
-    if exists {
-        for d := range
-    } else {
+    if ! exists {
         incoming, claimed, cancel := incomingBroadcaster.Listen()
 
         ListeningLoop:
@@ -280,10 +278,10 @@ func handleUploader(conn net.Conn, dlPool DownloaderPool, in chan common.Message
                 }
 
                 return
-            case dl := <- incoming:
-                if dl.uid == uid {
+            case incomingDl := <- incoming:
+                if incomingDl.uid == uid {
                     claimed <- true
-                    dlConn = dl.conn
+                    dl = incomingDl
                     break ListeningLoop
                 } else {
                     claimed <- false
