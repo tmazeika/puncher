@@ -98,13 +98,13 @@ func handleConn(conn net.Conn, dlPool DownloaderPool) {
     msg, ok := <- in
 
     if ! ok {
-        fmt.Printf("Closing connection with '%s'\n", conn.RemoteAddr())
+        handleError(conn, out, true, "Closing connection")
         return
     }
 
     // Expect ClientType message.
     if msg.Packet != common.ClientType {
-        fmt.Fprintf(os.Stderr, "Expected ClientType message from '%s', got 0x%x\n", conn.RemoteAddr(), msg)
+        handleError(conn, out, false, "Expected client type, got 0x%x", msg)
         return
     }
 
@@ -114,7 +114,7 @@ func handleConn(conn net.Conn, dlPool DownloaderPool) {
     case common.UploaderClientType:
         handleUploader(conn, dlPool, in, out)
     default:
-        fmt.Fprintf(os.Stderr, "Expected ClientType body from '%s', got ox%x\n", conn.RemoteAddr(), msg)
+        handleError(conn, out, true, "Expected client type body to be uploader or downloader, got 0x%x", msg)
         return
     }
 }
@@ -167,8 +167,8 @@ func handleDownloader(conn net.Conn, dlPool DownloaderPool, in chan common.Messa
         uid, err = generateUid()
 
         if err != nil {
-            handleError(conn, out, true, "Error generating UID: %s", err)
             dlPool.RUnlock()
+            handleError(conn, out, true, "Error generating UID: %s", err)
             return
         }
     }
@@ -211,7 +211,7 @@ func handleUploader(conn net.Conn, dlPool DownloaderPool, in chan common.Message
 
     // Validate Uid.
     if len(uid) != common.UidLength {
-        handleError(conn, out, false, "Invalid UID, got '%s'", uid)
+        handleError(conn, out, false, "Invalid UID length (not %d), got '%s'", common.UidLength, uid)
         return
     }
 }
@@ -226,7 +226,7 @@ func handleError(conn net.Conn, out chan common.Message, internal bool, format s
         packet = common.ProtocolError
     }
 
-    fmt.Fprintln(os.Stderr, conn.RemoteAddr(), msg)
+    fmt.Fprintln(os.Stderr, conn.RemoteAddr(), "<-", msg)
 
     out <- common.Message{
         Packet: packet,
