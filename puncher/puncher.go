@@ -118,6 +118,16 @@ func handleConn(conn net.Conn) {
         fmt.Fprintf(os.Stderr, "Expected ClientType message from '%s', got 0x%x\n", conn.RemoteAddr(), msg)
         return
     }
+
+    switch common.ClientType(msg.Body[0]) {
+    case common.DownloaderClientType:
+        // TODO: handleDownloader(...)
+    case common.UploaderClientType:
+        handleUploader(conn, msgCh)
+    default:
+        fmt.Fprintf(os.Stderr, "Expected ClientType body from '%s', got ox%x\n", conn.RemoteAddr(), msg)
+        return
+    }
 }
 
 type DownloaderPool struct {
