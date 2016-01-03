@@ -83,10 +83,10 @@ func handleConn(conn net.Conn) {
     in, out := common.MessageChannel(conn)
 
     // Expect ClientType message.
-    msg, ok := <- in
+    msg, ok := <- in.Ch
 
     if ! ok {
-        handleError(conn, out, true, "closing connection")
+        handleError(conn, out, true, in.Err)
         return
     }
 
@@ -150,7 +150,7 @@ var (
     dlPool = DownloaderPool{}
 )
 
-func handleDownloader(conn net.Conn, in chan common.Message, out chan common.Message) {
+func handleDownloader(conn net.Conn, in common.In, out common.Out) {
     var uid string
     var err error
 
@@ -177,9 +177,16 @@ func handleDownloader(conn net.Conn, in chan common.Message, out chan common.Mes
     defer dlPool.Remove(dl)
 
     // Send uid.
-    out <- common.Message{
+    out.Ch <- common.Message{
         Packet: common.UidAssignment,
         Body:   []byte(uid),
+    }
+
+    <- out.Done
+
+    if out.Err != nil {
+        handleError(conn, out, true, out.Err)
+        return
     }
 
     logInfo(conn, "sent uid")
@@ -192,7 +199,7 @@ func handleDownloader(conn net.Conn, in chan common.Message, out chan common.Mes
             Body:   []byte("timeout"),
         }
     // Wait for incoming halt message.
-    case msg := <- in:
+    case msg := <- in.Ch:
         if msg.Packet == common.Halt {
             logIncoming(conn, "halt:", string(msg.Body))
         } else {
@@ -200,18 +207,23 @@ func handleDownloader(conn net.Conn, in chan common.Message, out chan common.Mes
         }
     // Wait for a ready signal from the uploader.
     case <- dl.ready:
-        out <- common.Message{ common.UploaderReady, nil }
+        out.Ch <- common.Message{ common.UploaderReady, nil }
+        <- out.Done
+
+        if out.Err != nil {
+            handleError(conn, out, true, out.Err)
+        }
     }
 }
 
-func handleUploader(conn net.Conn, in chan common.Message, out chan common.Message) {
+func handleUploader(conn net.Conn, in common.In, out common.Out) {
     logInfo(conn, "identified as uploader")
     logInfo(conn, "awaiting uid")
 
-    msg, ok := <- in
+    msg, ok := <- in.Ch
 
     if ! ok {
-        handleError(conn, out, true, "closing connection")
+        handleError(conn, out, true, in.Err)
         return
     }
 
@@ -243,11 +255,10 @@ func handleUploader(conn net.Conn, in chan common.Message, out chan common.Messa
     } else {
         // If not, the say that the peer was not found.
         out <- common.Message{ common.PeerNotFound, nil }
-        return
     }
 }
 
-func handleError(conn net.Conn, out chan common.Message, internal bool, format string, a ...interface{}) {
+func handleError(conn net.Conn, out common.Out, internal bool, format string, a ...interface{}) {
     var packet common.Packet
     msg := fmt.Sprintf(format, a)
 
@@ -259,7 +270,7 @@ func handleError(conn net.Conn, out chan common.Message, internal bool, format s
 
     fmt.Fprintln(os.Stderr, conn.RemoteAddr(), "<-", msg)
 
-    out <- common.Message{
+    out.Ch <- common.Message{
         Packet: packet,
         Body:   []byte(msg),
     }
