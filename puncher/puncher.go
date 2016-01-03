@@ -16,6 +16,7 @@ const (
     CertFileName = "puncher_cert.pem"
     KeyFileName  = "puncher_cert.key"
 
+    // TODO: add to config
     // UidLength is the length of the UID that the puncher server issues.
     UidLength = 16
 )
