@@ -213,8 +213,10 @@ func handleDownloader(conn net.Conn, in common.In, out common.Out) {
             Body:   []byte("timeout"),
         }
     // Wait for incoming halt message.
-    case msg := <- in.Ch:
-        if msg.Packet == common.Halt {
+    case msg, ok := <- in.Ch:
+        if ! ok {
+            logError(conn, in.Err)
+        } else if msg.Packet == common.Halt {
             logIncoming(conn, "halt:", string(msg.Body))
         } else {
             logError(conn, fmt.Errorf("expected halt, got 0x%x", msg.Packet))
