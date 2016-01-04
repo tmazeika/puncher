@@ -51,10 +51,11 @@ func Start(c *cli.Context) {
         os.Exit(1)
     }
 
-    listener, err := tls.Listen("tcp", net.JoinHostPort("", args.port), &tls.Config{
+    tlsConfig := &tls.Config{
         Certificates: []tls.Certificate{cert},
         MinVersion:   tls.VersionTLS12,
-    })
+    }
+    listener, err := net.ListenTCP("tcp", net.JoinHostPort("", args.port))
 
     if err != nil {
         fmt.Fprintln(os.Stderr, err)
@@ -64,12 +65,18 @@ func Start(c *cli.Context) {
     fmt.Printf("Listening on port %s\n", args.port)
 
     for {
-        conn, err := listener.Accept()
+        conn, err := listener.AcceptTCP()
 
         if err != nil {
             fmt.Fprintln(os.Stderr, "Error accepting connection:", err)
             continue
         }
+
+        tlsConn := tls.Server(conn, tlsConfig)
+
+        tlsConn.Handshake()
+        conn.SetKeepAlive(true)
+        conn.SetKeepAlivePeriod(time.Second * 30)
 
         go handleConn(conn)
     }
