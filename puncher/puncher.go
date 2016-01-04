@@ -48,14 +48,21 @@ func Start(c *cli.Context) {
 
     if err != nil {
         fmt.Fprintln(os.Stderr, err)
-        os.Exit(1)
+        return
     }
 
     tlsConfig := &tls.Config{
         Certificates: []tls.Certificate{cert},
         MinVersion:   tls.VersionTLS12,
     }
-    listener, err := net.ListenTCP("tcp", net.JoinHostPort("", args.port))
+    tcpAddr, err := net.ResolveTCPAddr("tcp", net.JoinHostPort("", args.port))
+
+    if err != nil {
+        fmt.Fprintln(os.Stderr, err)
+        return
+    }
+
+    listener, err := net.ListenTCP("tcp", tcpAddr)
 
     if err != nil {
         fmt.Fprintln(os.Stderr, err)
@@ -201,7 +208,7 @@ func handleDownloader(conn net.Conn, in common.In, out common.Out) {
     select {
     // Wait for timeout.
     case <- time.After(time.Hour):
-        out <- common.Message{
+        out.Ch <- common.Message{
             Packet: common.Halt,
             Body:   []byte("timeout"),
         }
@@ -258,10 +265,10 @@ func handleUploader(conn net.Conn, in common.In, out common.Out) {
         dl.ready <- 0
 
         // Tell the uploader that the downloader is ready.
-        out <- common.Message{ common.PeerReady, dl.conn.RemoteAddr() }
+        out.Ch <- common.Message{ common.PeerReady, []byte(dl.conn.RemoteAddr().String()) }
     } else {
         // If not, the say that the peer was not found.
-        out <- common.Message{ common.PeerNotFound, nil }
+        out.Ch <- common.Message{ common.PeerNotFound, nil }
     }
 }
 
