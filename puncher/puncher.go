@@ -81,6 +81,7 @@ func Start(c *cli.Context) {
 
         tlsConn := tls.Server(conn, tlsConfig)
 
+        // TODO: remove
         tlsConn.Handshake()
         conn.SetKeepAlive(true)
         conn.SetKeepAlivePeriod(time.Second * 30)
