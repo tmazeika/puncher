@@ -164,7 +164,7 @@ var (
     dlPool = DownloaderPool{}
 )
 
-func handleDownloader(conn net.Conn, in common.In, out common.Out) {
+func handleDownloader(conn net.Conn, in *common.In, out *common.Out) {
     var uid string
     var err error
 
@@ -232,7 +232,7 @@ func handleDownloader(conn net.Conn, in common.In, out common.Out) {
     }
 }
 
-func handleUploader(conn net.Conn, in common.In, out common.Out) {
+func handleUploader(conn net.Conn, in *common.In, out *common.Out) {
     logInfo(conn, "identified as uploader")
     logInfo(conn, "awaiting uid")
 
