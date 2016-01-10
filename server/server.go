@@ -6,6 +6,7 @@ import (
 	"time"
 	"log"
 	"os"
+	"encoding/gob"
 )
 
 const LogFlags = log.Ldate | log.Ltime | log.LUTC | log.Lshortfile
@@ -22,7 +23,9 @@ type server struct {
 type client struct {
 	net.Conn
 
-	logger log.Logger
+	logger *log.Logger
+	enc    *gob.Encoder
+	dec    *gob.Decoder
 }
 
 func New(host, port string, idLen uint, cert *tls.Certificate) *server {
@@ -79,4 +82,7 @@ func (s server) Start() error {
 
 func (s server) handleConn(c client) {
 	defer c.Conn.Close()
+
+	c.enc = gob.NewEncoder(c.Conn)
+	c.dec = gob.NewDecoder(c.Conn)
 }
