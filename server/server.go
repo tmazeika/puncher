@@ -26,6 +26,10 @@ type client struct {
 	dec    *gob.Decoder
 }
 
+type target struct {
+
+}
+
 func New(host, port string, idLen uint) *server {
 	return &server{host, port, idLen}
 }
