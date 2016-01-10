@@ -102,10 +102,14 @@ func (c client) handle() {
 
 	switch clientType {
 	case protocol.TargetClient:
-		c.handleTarget()
+		err = c.handleTarget()
 	case protocol.SourceClient:
-		c.handleSource()
+		err = c.handleSource()
 	default:
 		c.logger.Printf("error: unknown client type 0x%x\n", clientType)
+	}
+
+	if err != nil {
+		c.logger.Println("error:", err)
 	}
 }

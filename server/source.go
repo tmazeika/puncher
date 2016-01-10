@@ -1,4 +1,4 @@
 package server
 
-func (c client) handleSource() {
+func (c client) handleSource() (err error) {
 }
