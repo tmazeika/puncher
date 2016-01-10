@@ -5,6 +5,8 @@ import (
 	"encoding/hex"
 	"github.com/transhift/common/protocol"
 	"time"
+	"errors"
+	"math"
 )
 
 func (c client) handleTarget() (err error) {
@@ -21,8 +23,9 @@ func (c client) handleTarget() (err error) {
 		}
 	}
 
-	readyCh := make(chan string)
-	target := target{&c, readyCh}
+	readyCh := make(chan *source)
+	connAtCh := make(chan time.Time)
+	target := target{&c, readyCh, connAtCh}
 
 	c.server.targetPool.put(id, &target)
 	defer c.server.targetPool.del(id)
@@ -43,15 +46,13 @@ func (c client) handleTarget() (err error) {
 			handleBadSig(c.logger, sig)
 		}
 	// Receive source ready.
-	case sourceAddr := <-readyCh:
+	case source := <-readyCh:
 		// Send source address.
-		err = c.enc.Encode(sourceAddr)
+		err = c.enc.Encode(source.RemoteAddr().String())
 
 		if err != nil {
 			return
 		}
-
-		startTime := time.Now()
 
 		// Expect okay signal.
 		var sig protocol.Signal
@@ -61,19 +62,58 @@ func (c client) handleTarget() (err error) {
 			return
 		}
 
-		endTime := time.Now()
-
 		if sig == protocol.OkaySignal {
 			c.logger.Println("got okay signal")
 		} else {
 			handleBadSig(c.logger, sig)
-			break
+			return
 		}
 
+		latency, err := c.measureLatency()
 
+		if err != nil {
+			return
+		}
+
+		connAt := time.Now()
+
+		// Use maximum latency.
+		if latency.Seconds() > source.latency.Seconds() {
+			connAt = connAt.Add(latency)
+		} else {
+			connAt = connAt.Add(source.latency)
+		}
+
+		connAtCh <- connAt.Add(time.Second)
 	}
 
 	return
+}
+
+func (c client) measureLatency() (time.Duration, error) {
+	// Send ping signal.
+	err := c.enc.Encode(protocol.PingSignal)
+
+	if err != nil {
+		return 0, err
+	}
+
+	var sig protocol.Signal
+	startTime := time.Now()
+
+	// Expect pong signal.
+	if err = c.dec.Decode(&sig); err != nil {
+		return 0, err
+	}
+
+	stopTime := time.Now()
+
+	if sig != protocol.PongSignal {
+		handleBadSig(c.logger, sig)
+		return 0, errors.New("couldn't measure latency")
+	}
+
+	return stopTime.Sub(startTime), nil
 }
 
 func generateId(len uint) (string, error) {

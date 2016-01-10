@@ -33,7 +33,14 @@ type client struct {
 type target struct {
 	*client
 
-	ready chan<- string
+	ready  chan<- *source
+	connAt <-chan time.Time
+}
+
+type source struct {
+	*client
+
+	latency time.Duration
 }
 
 func New(host, port string, idLen uint) *server {
