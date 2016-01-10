@@ -86,6 +86,7 @@ func (s server) handleConn(c client) {
 	c.enc = gob.NewEncoder(c.Conn)
 	c.dec = gob.NewDecoder(c.Conn)
 
+	// Expect client type.
 	var clientType protocol.ClientType
 	err := c.dec.Decode(&clientType)
 
