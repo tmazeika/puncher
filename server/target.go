@@ -53,12 +53,7 @@ func (c client) handleTarget() (err error) {
 		}
 
 		// Expect okay signal.
-		var sig protocol.Signal
-		err = c.dec.Decode(&sig)
-
-		if err != nil {
-			return
-		}
+		sig := <-protocol.SignalChannel(c.dec)
 
 		if sig == protocol.OkaySignal {
 			c.logger.Println("got okay signal")
@@ -67,25 +62,28 @@ func (c client) handleTarget() (err error) {
 			return
 		}
 
-		latency, err := c.measureLatency()
+		targetLatency, err := c.measureLatency()
 
 		if err != nil {
 			return
 		}
 
-		connAt := time.Now()
-
-		// Use maximum latency.
-		if latency.Nanoseconds() > source.latency.Nanoseconds() {
-			connAt = connAt.Add(latency)
-		} else {
-			connAt = connAt.Add(source.latency)
-		}
-
-		connAtCh <- connAt.Add(time.Second)
+		connAtCh <- getConnAt(targetLatency, source.latency)
 	}
 
 	return
+}
+
+func getConnAt(target, source time.Duration) time.Time {
+	t := time.Now()
+
+	if target.Nanoseconds() > source.Nanoseconds() {
+		t = t.Add(target)
+	} else {
+		t = t.Add(source)
+	}
+
+	return t.Add(time.Second)
 }
 
 func generateId(len uint) (string, error) {
