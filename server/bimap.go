@@ -10,6 +10,12 @@ func (b *biMap) put(k string, v *target) {
 	b.r[v] = k
 }
 
+func (b *biMap) del(k string) {
+	v := b.m[k]
+	delete(b.m, k)
+	delete(b.r, v)
+}
+
 func (b *biMap) contains(k string) bool {
 	_, found := b.m[k]
 	return found
