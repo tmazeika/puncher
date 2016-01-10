@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"encoding/gob"
+	"github.com/transhift/common/protocol"
 )
 
 const LogFlags = log.Ldate | log.Ltime | log.LUTC | log.Lshortfile
@@ -84,4 +85,29 @@ func (s server) handleConn(c client) {
 
 	c.enc = gob.NewEncoder(c.Conn)
 	c.dec = gob.NewDecoder(c.Conn)
+
+	var clientType protocol.ClientType
+	err := c.dec.Decode(&clientType)
+
+	if err != nil {
+		c.logger.Println("error:", err)
+		return
+	}
+
+	switch clientType {
+	case protocol.ClientDownloader:
+		s.handleDownloader(c)
+	case protocol.ClientUploader:
+		s.handleUploader(c)
+	default:
+		c.logger.Printf("error: unknown client type 0x%x\n", clientType)
+	}
+}
+
+func (s server) handleDownloader(c client) {
+
+}
+
+func (s server) handleUploader(c client) {
+
 }
