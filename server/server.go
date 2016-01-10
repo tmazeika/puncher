@@ -28,7 +28,7 @@ type client struct {
 }
 
 type target struct {
-	net.Conn
+	client
 
 	ready chan<- struct{}
 }
