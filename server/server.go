@@ -29,7 +29,7 @@ func New(host, port string, idLen uint, cert *tls.Certificate) *server {
 	return &server{host, port, idLen, cert}
 }
 
-func (s server) Listen() error {
+func (s server) Start() error {
 	const KeepAlivePeriod = time.Second * 30
 
 	tlsConfig := tls.Config{
@@ -48,31 +48,35 @@ func (s server) Listen() error {
 		return err
 	}
 
-	for {
-		conn, err := listener.AcceptTCP()
+	go func() {
+		for {
+			tcpConn, err := listener.AcceptTCP()
 
-		if err != nil {
-			logger.Println("error:", err)
-			continue
+			if err != nil {
+				logger.Println("error:", err)
+				continue
+			}
+
+			tlsConn := tls.Server(tcpConn, &tlsConfig)
+			c := client{tlsConn, log.New(os.Stdout, tcpConn.RemoteAddr().String(), LogFlags)}
+
+			if err := tcpConn.SetKeepAlive(true); err != nil {
+				c.logger.Println("error:", err)
+				continue
+			}
+
+			if err := tcpConn.SetKeepAlivePeriod(KeepAlivePeriod); err != nil {
+				c.logger.Println("error:", err)
+				continue
+			}
+
+			s.handleConn(c)
 		}
+	}()
 
-		tlsConn := tls.Server(conn, &tlsConfig)
-		c := client{tlsConn, log.New(os.Stdout, conn.RemoteAddr().String(), LogFlags)}
-
-		if err := conn.SetKeepAlive(true); err != nil {
-			c.logger.Println("error:", err)
-			continue
-		}
-
-		if err := conn.SetKeepAlivePeriod(KeepAlivePeriod); err != nil {
-			c.logger.Println("error:", err)
-			continue
-		}
-
-		s.handleConn(c)
-	}
+	return nil
 }
 
 func (s server) handleConn(c client) {
-
+	defer c.Conn.Close()
 }
