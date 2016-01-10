@@ -104,11 +104,3 @@ func (s server) handleConn(c client) {
 		c.logger.Printf("error: unknown client type 0x%x\n", clientType)
 	}
 }
-
-func (s server) handleTarget(c client) {
-
-}
-
-func (s server) handleSource(c client) {
-
-}
