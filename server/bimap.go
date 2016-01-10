@@ -26,10 +26,10 @@ func (b *biMap) containsRev(v *target) bool {
 	return found
 }
 
-func (b *biMap) get(k string) *target {
+func (b *biMap) get(k string) (*target, bool) {
 	return b.m[k]
 }
 
-func (b *biMap) getRev(v *target) string {
+func (b *biMap) getRev(v *target) (string, bool) {
 	return b.r[v]
 }
