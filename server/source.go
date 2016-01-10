@@ -1,5 +1,4 @@
 package server
 
-func (s server) handleSource(c client) {
-
+func (c client) handleSource() {
 }

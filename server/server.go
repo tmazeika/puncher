@@ -23,6 +23,7 @@ type server struct {
 type client struct {
 	net.Conn
 
+	server *server
 	logger *log.Logger
 	enc    *gob.Encoder
 	dec    *gob.Decoder
@@ -61,7 +62,11 @@ func (s server) Start(cert *tls.Certificate) error {
 			}
 
 			tlsConn := tls.Server(tcpConn, &tlsConfig)
-			c := client{tlsConn, log.New(os.Stdout, tcpConn.RemoteAddr().String(), LogFlags)}
+			c := client{
+				Conn: tlsConn,
+				server: &s,
+				logger: log.New(os.Stdout, tcpConn.RemoteAddr().String(), LogFlags),
+			}
 
 			if err := tcpConn.SetKeepAlive(true); err != nil {
 				c.logger.Println("error:", err)
@@ -73,14 +78,14 @@ func (s server) Start(cert *tls.Certificate) error {
 				continue
 			}
 
-			go s.handleConn(c)
+			go c.handle()
 		}
 	}()
 
 	return nil
 }
 
-func (s server) handleConn(c client) {
+func (c client) handle() {
 	defer c.Conn.Close()
 
 	c.enc = gob.NewEncoder(c.Conn)
@@ -97,9 +102,9 @@ func (s server) handleConn(c client) {
 
 	switch clientType {
 	case protocol.TargetClient:
-		s.handleTarget(c)
+		c.handleTarget()
 	case protocol.SourceClient:
-		s.handleSource(c)
+		c.handleSource()
 	default:
 		c.logger.Printf("error: unknown client type 0x%x\n", clientType)
 	}

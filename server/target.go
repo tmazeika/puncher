@@ -1,5 +1,4 @@
 package server
 
-func (s server) handleTarget(c client) {
-
+func (c client) handleTarget() {
 }
