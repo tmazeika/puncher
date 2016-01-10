@@ -89,7 +89,7 @@ func (c client) handleTarget() (err error) {
 }
 
 func generateId(len uint) (string, error) {
-	idBuff := make([]byte, len / 2 + 1) // 2 hex chars per byte, +1 to ceil
+	idBuff := make([]byte, len/2+1) // 2 hex chars per byte, +1 to ceil
 
 	if _, err := rand.Read(idBuff); err != nil {
 		return "", err

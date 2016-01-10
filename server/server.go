@@ -1,14 +1,14 @@
 package server
 
 import (
-	"net"
 	"crypto/tls"
-	"time"
-	"log"
-	"os"
 	"encoding/gob"
-	"github.com/transhift/common/protocol"
 	"errors"
+	"github.com/transhift/common/protocol"
+	"log"
+	"net"
+	"os"
+	"time"
 )
 
 const LogFlags = log.Ldate | log.Ltime | log.LUTC | log.Lshortfile
@@ -82,7 +82,7 @@ func (s server) Start(cert *tls.Certificate) error {
 
 			tlsConn := tls.Server(tcpConn, &tlsConfig)
 			c := client{
-				Conn: tlsConn,
+				Conn:   tlsConn,
 				server: &s,
 				logger: log.New(os.Stdout, tcpConn.RemoteAddr().String(), LogFlags),
 			}

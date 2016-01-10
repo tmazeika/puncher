@@ -1,40 +1,40 @@
 package puncher
 
 import (
-    "github.com/codegangsta/cli"
-    "github.com/transhift/common/storage"
-    "log"
-    "strconv"
-    "github.com/transhift/puncher/server"
+	"github.com/codegangsta/cli"
+	"github.com/transhift/common/storage"
+	"github.com/transhift/puncher/server"
+	"log"
+	"strconv"
 )
 
 const (
-    CertName = "pcert.pem"
-    KeyName  = "pcert.key"
+	CertName = "pcert.pem"
+	KeyName  = "pcert.key"
 )
 
 func Start(c *cli.Context) {
-    // Vars for CLI args.
-    var (
-        host   = c.GlobalString("host")
-        port   = c.GlobalInt("port")
-        idLen  = c.GlobalInt("id-len")
-        appDir = c.GlobalString("app-dir")
-    )
+	// Vars for CLI args.
+	var (
+		host   = c.GlobalString("host")
+		port   = c.GlobalInt("port")
+		idLen  = c.GlobalInt("id-len")
+		appDir = c.GlobalString("app-dir")
+	)
 
-    storage, err := storage.New(appDir, nil)
-    cert, err := storage.Certificate(CertName, KeyName)
+	storage, err := storage.New(appDir, nil)
+	cert, err := storage.Certificate(CertName, KeyName)
 
-    if err != nil {
-        server.Logger.Println("error:", err)
-        return
-    }
+	if err != nil {
+		server.Logger.Println("error:", err)
+		return
+	}
 
-    server := server.New(host, strconv.Itoa(port), uint(idLen))
+	server := server.New(host, strconv.Itoa(port), uint(idLen))
 
-    if err := server.Start(cert); err != nil {
-        log.Println("error:", err)
-    }
+	if err := server.Start(cert); err != nil {
+		log.Println("error:", err)
+	}
 }
 
 /*
