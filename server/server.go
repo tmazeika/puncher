@@ -8,6 +8,7 @@ import (
 	"os"
 	"encoding/gob"
 	"github.com/transhift/common/protocol"
+	"github.com/transhift/puncher/puncher"
 )
 
 type server struct {
@@ -53,7 +54,7 @@ func (s server) Start(cert *tls.Certificate) error {
 			tcpConn, err := listener.AcceptTCP()
 
 			if err != nil {
-				logger.Println("error:", err)
+				puncher.Logger.Println("error:", err)
 				continue
 			}
 
@@ -61,7 +62,7 @@ func (s server) Start(cert *tls.Certificate) error {
 			c := client{
 				Conn: tlsConn,
 				server: &s,
-				logger: log.New(os.Stdout, tcpConn.RemoteAddr().String(), LogFlags),
+				logger: log.New(os.Stdout, tcpConn.RemoteAddr().String(), puncher.LogFlags),
 			}
 
 			if err := tcpConn.SetKeepAlive(true); err != nil {

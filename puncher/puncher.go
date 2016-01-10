@@ -16,7 +16,7 @@ const (
 
 const LogFlags = log.Ldate | log.Ltime | log.LUTC | log.Lshortfile
 
-var logger = log.New(os.Stdout, "", LogFlags)
+var Logger = log.New(os.Stdout, "", LogFlags)
 
 func Start(c *cli.Context) {
     // Vars for CLI args.
