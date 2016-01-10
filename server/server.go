@@ -17,7 +17,6 @@ type server struct {
 	host   string
 	port   string
 	idLen  uint
-	cert   *tls.Certificate
 }
 
 type client struct {
@@ -28,15 +27,15 @@ type client struct {
 	dec    *gob.Decoder
 }
 
-func New(host, port string, idLen uint, cert *tls.Certificate) *server {
-	return &server{host, port, idLen, cert}
+func New(host, port string, idLen uint) *server {
+	return &server{host, port, idLen}
 }
 
-func (s server) Start() error {
+func (s server) Start(cert *tls.Certificate) error {
 	const KeepAlivePeriod = time.Second * 30
 
 	tlsConfig := tls.Config{
-		Certificates: []tls.Certificate{s.cert},
+		Certificates: []tls.Certificate{cert},
 		MinVersion:   tls.VersionTLS12,
 	}
 	laddr, err := net.ResolveTCPAddr("tcp", net.JoinHostPort(s.host, s.port))
