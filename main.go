@@ -8,24 +8,30 @@ import (
 
 func main() {
     app := cli.NewApp()
-
     app.Name = "Puncher"
     app.Usage = "TCP hole puncher for Transhift, a peer-to-peer file transferer"
     app.Version = "0.1.0"
-
     app.Flags = []cli.Flag{
         cli.StringFlag{
+            Name: "host, h",
+            Value: "127.0.0.1",
+            Usage: "host to bind to",
+        },
+        cli.IntFlag{
             Name: "port, p",
-            Value: "50977",
+            Value: 50977,
             Usage: "port to bind to",
+        },
+        cli.IntFlag{
+            Name: "id-len",
+            Value: 16,
+            Usage: "length of issued identifiers",
         },
         cli.StringFlag{
             Name: "app-dir",
-            Value: "",
             Usage: "application directory",
         },
     }
-
     app.Action = puncher.Start
 
     app.Run(os.Args)

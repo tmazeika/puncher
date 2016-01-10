@@ -1,7 +1,6 @@
 package puncher
 
 import (
-    "github.com/transhift/common/common"
     "net"
     "fmt"
     "os"
@@ -10,39 +9,24 @@ import (
     "crypto/tls"
     "crypto/rand"
     "time"
+    "github.com/transhift/common/storage"
 )
 
 const (
     CertFileName = "puncher_cert.pem"
     KeyFileName  = "puncher_cert.key"
-
-    // TODO: add to config
-    // UidLength is the length of the UID that the puncher server issues.
-    UidLength = 16
 )
 
-type args struct {
-    port   string
-    appDir string
-}
-
-func (a args) portOrDef(def string) string {
-    if len(a.port) == 0 {
-        return def
-    }
-
-    return a.port
-}
-
 func Start(c *cli.Context) {
-    args := args{
-        port:   c.GlobalString("port"),
-        appDir: c.GlobalString("app-dir"),
-    }
+    // Vars for CLI arguments.
+    var (
+        host   = c.GlobalString("host")
+        port   = c.GlobalInt("port")
+        idLen  = c.GlobalInt("id-len")
+        appDir = c.GlobalString("app-dir")
+    )
 
-    storage := &common.Storage{
-        CustomDir: args.appDir,
-    }
+    storage, err := storage.New(appDir, nil)
 
     cert, err := storage.Certificate(CertFileName, KeyFileName)
 
@@ -55,7 +39,7 @@ func Start(c *cli.Context) {
         Certificates: []tls.Certificate{cert},
         MinVersion:   tls.VersionTLS12,
     }
-    tcpAddr, err := net.ResolveTCPAddr("tcp", net.JoinHostPort("", args.port))
+    tcpAddr, err := net.ResolveTCPAddr("tcp", net.JoinHostPort("", port))
 
     if err != nil {
         fmt.Fprintln(os.Stderr, err)
@@ -79,10 +63,6 @@ func Start(c *cli.Context) {
             continue
         }
 
-        tlsConn := tls.Server(conn, tlsConfig)
-
-        // TODO: remove
-        tlsConn.Handshake()
         conn.SetKeepAlive(true)
         conn.SetKeepAlivePeriod(time.Second * 30)
 
