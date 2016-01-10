@@ -28,7 +28,9 @@ type client struct {
 }
 
 type target struct {
+	net.Conn
 
+	ready chan<- struct{}
 }
 
 func New(host, port string, idLen uint) *server {
