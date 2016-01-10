@@ -1,21 +1,17 @@
-package server
+package puncher
 
 import (
-    "os"
     "github.com/codegangsta/cli"
     "github.com/transhift/common/storage"
     "log"
     "strconv"
+    "github.com/transhift/puncher/server"
 )
 
 const (
     CertName = "pcert.pem"
     KeyName  = "pcert.key"
 )
-
-const LogFlags = log.Ldate | log.Ltime | log.LUTC | log.Lshortfile
-
-var logger = log.New(os.Stdout, "", LogFlags)
 
 func Start(c *cli.Context) {
     // Vars for CLI args.
@@ -30,11 +26,11 @@ func Start(c *cli.Context) {
     cert, err := storage.Certificate(CertName, KeyName)
 
     if err != nil {
-        log.Println("error:", err)
+        server.Logger.Println("error:", err)
         return
     }
 
-    server := New(host, strconv.Itoa(port), idLen)
+    server := server.New(host, strconv.Itoa(port), idLen)
 
     if err := server.Start(cert); err != nil {
         log.Println("error:", err)
