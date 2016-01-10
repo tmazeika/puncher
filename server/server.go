@@ -15,9 +15,9 @@ const LogFlags = log.Ldate | log.Ltime | log.LUTC | log.Lshortfile
 var logger = log.New(os.Stdout, "", LogFlags)
 
 type server struct {
-	host   string
-	port   string
-	idLen  uint
+	host  string
+	port  string
+	idLen uint
 }
 
 type client struct {
