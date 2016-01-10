@@ -8,6 +8,7 @@ import (
 	"os"
 	"encoding/gob"
 	"github.com/transhift/common/protocol"
+	"errors"
 )
 
 const LogFlags = log.Ldate | log.Ltime | log.LUTC | log.Lshortfile
@@ -130,6 +131,32 @@ func (c client) handle() {
 	if err != nil {
 		c.logger.Println("error:", err)
 	}
+}
+
+func (c client) measureLatency() (time.Duration, error) {
+	// Send ping signal.
+	err := c.enc.Encode(protocol.PingSignal)
+
+	if err != nil {
+		return 0, err
+	}
+
+	var sig protocol.Signal
+	startTime := time.Now()
+
+	// Expect pong signal.
+	if err = c.dec.Decode(&sig); err != nil {
+		return 0, err
+	}
+
+	stopTime := time.Now()
+
+	if sig != protocol.PongSignal {
+		handleBadSig(c.logger, sig)
+		return 0, errors.New("couldn't measure latency")
+	}
+
+	return stopTime.Sub(startTime), nil
 }
 
 func handleBadSig(logger *log.Logger, sig protocol.Signal) {
