@@ -30,7 +30,7 @@ func Start(c *cli.Context) {
         return
     }
 
-    server := server.New(host, strconv.Itoa(port), idLen)
+    server := server.New(host, strconv.Itoa(port), uint(idLen))
 
     if err := server.Start(cert); err != nil {
         log.Println("error:", err)

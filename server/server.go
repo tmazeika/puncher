@@ -10,6 +10,10 @@ import (
 	"github.com/transhift/common/protocol"
 )
 
+const LogFlags = log.Ldate | log.Ltime | log.LUTC | log.Lshortfile
+
+var Logger = log.New(os.Stdout, "", LogFlags)
+
 type server struct {
 	host       string
 	port       string
@@ -18,7 +22,7 @@ type server struct {
 }
 
 type client struct {
-	*net.Conn
+	net.Conn
 
 	server *server
 	logger *log.Logger
@@ -29,18 +33,22 @@ type client struct {
 type target struct {
 	*client
 
-	ready chan<- struct{}
+	ready chan<- string
 }
 
 func New(host, port string, idLen uint) *server {
-	return &server{host, port, idLen}
+	return &server{
+		host:  host,
+		port:  port,
+		idLen: idLen,
+	}
 }
 
 func (s server) Start(cert *tls.Certificate) error {
 	const KeepAlivePeriod = time.Second * 30
 
 	tlsConfig := tls.Config{
-		Certificates: []tls.Certificate{cert},
+		Certificates: []tls.Certificate{*cert},
 		MinVersion:   tls.VersionTLS12,
 	}
 	laddr, err := net.ResolveTCPAddr("tcp", net.JoinHostPort(s.host, s.port))
@@ -60,7 +68,7 @@ func (s server) Start(cert *tls.Certificate) error {
 			tcpConn, err := listener.AcceptTCP()
 
 			if err != nil {
-				logger.Println("error:", err)
+				Logger.Println("error:", err)
 				continue
 			}
 
@@ -114,5 +122,13 @@ func (c client) handle() {
 
 	if err != nil {
 		c.logger.Println("error:", err)
+	}
+}
+
+func handleBadSig(logger *log.Logger, sig protocol.Signal) {
+	if sig == -1 {
+		logger.Println("error receiving signal")
+	} else {
+		logger.Println("got unexpected signal")
 	}
 }

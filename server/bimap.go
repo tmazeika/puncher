@@ -48,12 +48,16 @@ func (b *biMap) get(k string) (*target, bool) {
 	b.RLock()
 	defer b.RUnlock()
 
-	return b.m[k]
+	v, found := b.m[k]
+
+	return v, found
 }
 
 func (b *biMap) getRev(v *target) (string, bool) {
 	b.RLock()
 	defer b.RUnlock()
 
-	return b.r[v]
+	k, found := b.r[v]
+
+	return k, found
 }
