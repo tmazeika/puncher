@@ -4,12 +4,11 @@ import (
     "net"
     "fmt"
     "os"
-    "sync"
     "github.com/codegangsta/cli"
     "crypto/tls"
-    "crypto/rand"
     "time"
     "github.com/transhift/common/storage"
+    "strconv"
 )
 
 const (
@@ -39,7 +38,7 @@ func Start(c *cli.Context) {
         Certificates: []tls.Certificate{cert},
         MinVersion:   tls.VersionTLS12,
     }
-    tcpAddr, err := net.ResolveTCPAddr("tcp", net.JoinHostPort("", port))
+    tcpAddr, err := net.ResolveTCPAddr("tcp", net.JoinHostPort("", strconv.Itoa(port)))
 
     if err != nil {
         fmt.Fprintln(os.Stderr, err)
@@ -53,7 +52,7 @@ func Start(c *cli.Context) {
         os.Exit(1)
     }
 
-    fmt.Printf("Listening on port %s\n", args.port)
+//    fmt.Printf("Listening on port %s\n", args.port)
 
     for {
         conn, err := listener.AcceptTCP()
@@ -66,7 +65,7 @@ func Start(c *cli.Context) {
         conn.SetKeepAlive(true)
         conn.SetKeepAlivePeriod(time.Second * 30)
 
-        go handleConn(conn)
+//        go handleConn(conn)
     }
 }
 
