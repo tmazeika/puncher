@@ -12,9 +12,10 @@ import (
 )
 
 type server struct {
-	host  string
-	port  string
-	idLen uint
+	host       string
+	port       string
+	idLen      uint
+	targetPool biMap
 }
 
 type client struct {
