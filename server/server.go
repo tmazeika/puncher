@@ -73,7 +73,7 @@ func (s server) Start(cert *tls.Certificate) error {
 				continue
 			}
 
-			s.handleConn(c)
+			go s.handleConn(c)
 		}
 	}()
 
