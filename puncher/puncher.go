@@ -1,7 +1,6 @@
 package puncher
 
 import (
-    "fmt"
     "os"
     "github.com/codegangsta/cli"
     "github.com/transhift/common/storage"
