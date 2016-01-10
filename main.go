@@ -13,12 +13,12 @@ func main() {
     app.Version = "0.1.0"
     app.Flags = []cli.Flag{
         cli.StringFlag{
-            Name: "host, h",
+            Name: "host",
             Value: "127.0.0.1",
             Usage: "host to bind to",
         },
         cli.IntFlag{
-            Name: "port, p",
+            Name: "port",
             Value: 50977,
             Usage: "port to bind to",
         },

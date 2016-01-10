@@ -70,6 +70,7 @@ func Start(c *cli.Context) {
     }
 }
 
+/*
 func handleConn(conn net.Conn) {
     defer conn.Close()
 
@@ -276,3 +277,4 @@ func generateUid() (string, error) {
 
     return fmt.Sprintf("%x", uidBuff), nil
 }
+*/
