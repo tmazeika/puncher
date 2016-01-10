@@ -1,23 +1,26 @@
 package puncher
 
 import (
-    "net"
     "fmt"
     "os"
     "github.com/codegangsta/cli"
-    "crypto/tls"
-    "time"
     "github.com/transhift/common/storage"
+    "log"
+    "github.com/transhift/puncher/server"
     "strconv"
 )
 
 const (
-    CertFileName = "puncher_cert.pem"
-    KeyFileName  = "puncher_cert.key"
+    CertName = "pcert.pem"
+    KeyName  = "pcert.key"
 )
 
+const LogFlags = log.Ldate | log.Ltime | log.LUTC | log.Lshortfile
+
+var logger = log.New(os.Stdout, "", LogFlags)
+
 func Start(c *cli.Context) {
-    // Vars for CLI arguments.
+    // Vars for CLI args.
     var (
         host   = c.GlobalString("host")
         port   = c.GlobalInt("port")
@@ -26,46 +29,17 @@ func Start(c *cli.Context) {
     )
 
     storage, err := storage.New(appDir, nil)
-
-    cert, err := storage.Certificate(CertFileName, KeyFileName)
+    cert, err := storage.Certificate(CertName, KeyName)
 
     if err != nil {
-        fmt.Fprintln(os.Stderr, err)
+        log.Println("error:", err)
         return
     }
 
-    tlsConfig := &tls.Config{
-        Certificates: []tls.Certificate{cert},
-        MinVersion:   tls.VersionTLS12,
-    }
-    tcpAddr, err := net.ResolveTCPAddr("tcp", net.JoinHostPort("", strconv.Itoa(port)))
+    server := server.New(host, strconv.Itoa(port), idLen)
 
-    if err != nil {
-        fmt.Fprintln(os.Stderr, err)
-        return
-    }
-
-    listener, err := net.ListenTCP("tcp", tcpAddr)
-
-    if err != nil {
-        fmt.Fprintln(os.Stderr, err)
-        os.Exit(1)
-    }
-
-//    fmt.Printf("Listening on port %s\n", args.port)
-
-    for {
-        conn, err := listener.AcceptTCP()
-
-        if err != nil {
-            fmt.Fprintln(os.Stderr, "Error accepting connection:", err)
-            continue
-        }
-
-        conn.SetKeepAlive(true)
-        conn.SetKeepAlivePeriod(time.Second * 30)
-
-//        go handleConn(conn)
+    if err := server.Start(cert); err != nil {
+        log.Println("error:", err)
     }
 }
 
