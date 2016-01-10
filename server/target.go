@@ -76,7 +76,7 @@ func (c client) handleTarget() (err error) {
 		connAt := time.Now()
 
 		// Use maximum latency.
-		if latency.Seconds() > source.latency.Seconds() {
+		if latency.Nanoseconds() > source.latency.Nanoseconds() {
 			connAt = connAt.Add(latency)
 		} else {
 			connAt = connAt.Add(source.latency)
