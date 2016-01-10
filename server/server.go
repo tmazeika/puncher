@@ -96,19 +96,19 @@ func (s server) handleConn(c client) {
 	}
 
 	switch clientType {
-	case protocol.ClientDownloader:
-		s.handleDownloader(c)
-	case protocol.ClientUploader:
-		s.handleUploader(c)
+	case protocol.TargetClient:
+		s.handleTarget(c)
+	case protocol.SourceClient:
+		s.handleSource(c)
 	default:
 		c.logger.Printf("error: unknown client type 0x%x\n", clientType)
 	}
 }
 
-func (s server) handleDownloader(c client) {
+func (s server) handleTarget(c client) {
 
 }
 
-func (s server) handleUploader(c client) {
+func (s server) handleSource(c client) {
 
 }
