@@ -1,11 +1,10 @@
-package puncher
+package server
 
 import (
     "os"
     "github.com/codegangsta/cli"
     "github.com/transhift/common/storage"
     "log"
-    "github.com/transhift/puncher/server"
     "strconv"
 )
 
@@ -16,7 +15,7 @@ const (
 
 const LogFlags = log.Ldate | log.Ltime | log.LUTC | log.Lshortfile
 
-var Logger = log.New(os.Stdout, "", LogFlags)
+var logger = log.New(os.Stdout, "", LogFlags)
 
 func Start(c *cli.Context) {
     // Vars for CLI args.
@@ -35,7 +34,7 @@ func Start(c *cli.Context) {
         return
     }
 
-    server := server.New(host, strconv.Itoa(port), idLen)
+    server := New(host, strconv.Itoa(port), idLen)
 
     if err := server.Start(cert); err != nil {
         log.Println("error:", err)
