@@ -33,6 +33,5 @@ func main() {
 		},
 	}
 	app.Action = puncher.Start
-
 	app.Run(os.Args)
 }
