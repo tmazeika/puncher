@@ -62,13 +62,7 @@ func (c client) handleTarget() (err error) {
 			return
 		}
 
-		targetLatency, err := c.measureLatency()
-
-		if err != nil {
-			return err
-		}
-
-		connAtCh <- getConnAt(targetLatency, source.latency)
+//		connAtCh <- getConnAt(targetLatency, source.latency)
 	}
 
 	return
