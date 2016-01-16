@@ -4,16 +4,11 @@ import (
 	"crypto/tls"
 	"encoding/gob"
 	"errors"
-	"github.com/transhift/common/protocol"
 	"log"
 	"net"
 	"os"
 	"time"
 )
-
-const LogFlags = log.Ldate | log.Ltime | log.LUTC | log.Lshortfile
-
-var Logger = log.New(os.Stdout, "", LogFlags)
 
 type server struct {
 	host       string

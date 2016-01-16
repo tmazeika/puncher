@@ -1,11 +1,12 @@
 package puncher
 
 import (
+	"strconv"
 	"github.com/codegangsta/cli"
 	"github.com/transhift/common/storage"
 	"github.com/transhift/puncher/server"
-	"log"
-	"strconv"
+	"crypto/tls"
+	"github.com/transhift/common/logging"
 )
 
 const (
@@ -13,28 +14,52 @@ const (
 	KeyName  = "pcert.key"
 )
 
-func Start(c *cli.Context) {
-	// Vars for CLI args.
-	var (
-		host   = c.GlobalString("host")
-		port   = c.GlobalInt("port")
-		idLen  = c.GlobalInt("id-len")
-		appDir = c.GlobalString("app-dir")
-	)
+type args struct {
+	host   string
+	port   int
+	idLen  int
+	appDir string
+}
 
-	storage, err := storage.New(appDir, nil)
-	cert, err := storage.Certificate(CertName, KeyName)
+func Start(c *cli.Context) {
+	a := args{
+		host:   c.GlobalString("host"),
+		port:   c.GlobalInt("port"),
+		idLen:  c.GlobalInt("id-len"),
+		appDir: c.GlobalString("app-dir"),
+	}
+
+	cert, err := Cert(a)
 
 	if err != nil {
-		server.Logger.Println("error:", err)
-		return
+		logging.Logger.Fatalln("error:", err)
 	}
 
-	server := server.New(host, strconv.Itoa(port), uint(idLen))
+	err = Server(a, cert)
 
-	if err := server.Start(cert); err != nil {
-		log.Println("error:", err)
+	if err != nil {
+		logging.Logger.Fatalln("error:", err)
 	}
+}
+
+func Cert(a *args) (*tls.Certificate, error) {
+	s, err := storage.New(a.appDir, nil)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return s.Certificate(CertName, KeyName)
+}
+
+func Server(a *args, cert *tls.Certificate) error {
+	s := server.New(a.host, strconv.Itoa(a.port), uint(a.idLen))
+
+	if err := s.Start(cert); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 /*
