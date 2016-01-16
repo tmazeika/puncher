@@ -68,18 +68,6 @@ func (c client) handleTarget() (err error) {
 	return
 }
 
-func getConnAt(target, source time.Duration) time.Time {
-	t := time.Now()
-
-	if target.Nanoseconds() > source.Nanoseconds() {
-		t = t.Add(target)
-	} else {
-		t = t.Add(source)
-	}
-
-	return t.Add(time.Second)
-}
-
 func generateId(len uint) (string, error) {
 	idBuff := make([]byte, len/2+1) // 2 hex chars per byte, +1 to ceil
 

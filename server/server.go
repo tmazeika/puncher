@@ -3,7 +3,6 @@ package server
 import (
 	"crypto/tls"
 	"encoding/gob"
-	"errors"
 	"log"
 	"net"
 	"os"
@@ -13,39 +12,34 @@ import (
 )
 
 type server struct {
-	host       string
-	port       string
-	idLen      uint
-	targetPool biMap
+	host string
+	port string
 }
 
 type client struct {
 	net.Conn
 
-	server *server
-	logger *log.Logger
-	enc    *gob.Encoder
-	dec    *gob.Decoder
+	log     log.Logger
+	enc     gob.Encoder
+	dec     gob.Decoder
+	targets []target
 }
 
 type target struct {
-	*client
+	client
 
-	ready  chan<- *source
-	connAt <-chan time.Time
+	id       string
+	peerAddr chan<- *source
 }
 
 type source struct {
-	*client
-
-	latency time.Duration
+	client
 }
 
-func New(host, port string, idLen uint) *server {
+func New(host, port string) *server {
 	return &server{
-		host:  host,
-		port:  port,
-		idLen: idLen,
+		host: host,
+		port: port,
 	}
 }
 
