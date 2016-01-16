@@ -5,24 +5,14 @@ import (
 	"encoding/gob"
 	"log"
 	"net"
-	"os"
 	"time"
-	"github.com/transhift/common/logging"
 	"github.com/transhift/common/protocol"
+	"github.com/transhift/puncher/client"
 )
 
 type server struct {
 	host string
 	port string
-}
-
-type client struct {
-	net.Conn
-
-	log     log.Logger
-	enc     gob.Encoder
-	dec     gob.Decoder
-	targets []target
 }
 
 type target struct {
@@ -43,56 +33,79 @@ func New(host, port string) *server {
 	}
 }
 
-func (s server) Start(cert *tls.Certificate) error {
-	const KeepAlivePeriod = time.Second * 30
+func (s server) listen() (<-chan *net.TCPConn, error) {
+	const Net = "tcp"
 
-	tlsConfig := tls.Config{
-		Certificates: []tls.Certificate{*cert},
-		MinVersion:   tls.VersionTLS12,
-	}
-	laddr, err := net.ResolveTCPAddr("tcp", net.JoinHostPort(s.host, s.port))
+	laddr, err := net.ResolveTCPAddr(Net, net.JoinHostPort(s.host, s.port))
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	listener, err := net.ListenTCP("tcp", laddr)
+	l, err := net.ListenTCP(Net, laddr)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
+
+	ch := make(chan *net.TCPConn)
 
 	go func() {
 		for {
-			tcpConn, err := listener.AcceptTCP()
+			conn, err := l.AcceptTCP()
 
 			if err != nil {
-				logging.Logger.Println("error:", err)
-				continue
+				log.Println("error:", err)
+			} else {
+				ch <- conn
+			}
+		}
+	}()
+
+	return ch, nil
+}
+
+func (s server) Start(cert tls.Certificate) error {
+	ch, err := s.listen()
+
+	if err != nil {
+		return err
+	}
+
+	tlsConfig := tlsConfig(cert)
+
+	go func() {
+		for {
+			tcpConn := <- ch
+			tlsConn := tls.Server(tcpConn, tlsConfig)
+			c := client.New(tlsConn)
+
+			if err := useKeepAlive(tcpConn); err != nil {
+				log.Println("error:", err)
 			}
 
-			tlsConn := tls.Server(tcpConn, &tlsConfig)
-			c := client{
-				Conn:   tlsConn,
-				server: &s,
-				logger: log.New(os.Stdout, tcpConn.RemoteAddr().String(), logging.LogFlags),
-			}
-
-			if err := tcpConn.SetKeepAlive(true); err != nil {
-				c.logger.Println("error:", err)
-				continue
-			}
-
-			if err := tcpConn.SetKeepAlivePeriod(KeepAlivePeriod); err != nil {
-				c.logger.Println("error:", err)
-				continue
-			}
-
-			go c.handle()
+			go c.Handle()
 		}
 	}()
 
 	return nil
+}
+
+func useKeepAlive(conn *net.TCPConn) error {
+	const Period = time.Second * 30
+
+	if err := conn.SetKeepAlive(true); err != nil {
+		return err
+	}
+
+	return conn.SetKeepAlivePeriod(Period)
+}
+
+func tlsConfig(cert tls.Certificate) *tls.Config {
+	return &tls.Config{
+		Certificates: []tls.Certificate{cert},
+		MinVersion:   tls.VersionTLS12,
+	}
 }
 
 func (c client) handle() {
