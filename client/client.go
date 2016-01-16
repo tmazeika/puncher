@@ -7,6 +7,7 @@ import (
 	"os"
 	"github.com/transhift/puncher/common/protocol"
 	"fmt"
+	"errors"
 )
 
 var targets = map[string]*client
@@ -46,7 +47,15 @@ func (c *client) Handle() error {
 
 	// Expect NodeType.
 	var nodeType protocol.NodeType
-	if err := c.dec.Decode(&nodeType); err != nil {
+	exitCh, msgCh, errCh := protocol.Inbound(c.dec)
+	select {
+	case <-exitCh:
+		return errors.New("exiting")
+	case <-msgCh:
+		if err := c.dec.Decode(&nodeType); err != nil {
+			return err
+		}
+	case err := <-errCh:
 		return err
 	}
 
