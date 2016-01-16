@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	targets = make(map[string]*client)
+	targets map[string]*client
 )
 
 type client struct {
