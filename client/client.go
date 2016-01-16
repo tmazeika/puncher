@@ -9,6 +9,8 @@ import (
 	"fmt"
 )
 
+var targets = map[string]*client
+
 type client struct {
 	net.Conn
 
@@ -16,6 +18,12 @@ type client struct {
 	logger  *log.Logger
 	enc     *gob.Encoder
 	dec     *gob.Decoder
+}
+
+type target struct {
+	client
+
+	ready chan<- *client
 }
 
 func New(conn net.Conn) *client {
@@ -29,10 +37,13 @@ func New(conn net.Conn) *client {
 
 func logger(conn net.Conn) *log.Logger {
 	const Flags = log.Ldate | log.Ltime | log.LUTC | log.Lshortfile
-	return log.New(os.Stdout, conn.RemoteAddr().String(), Flags)
+	prefix := conn.RemoteAddr().String()
+	return log.New(os.Stdout, prefix, Flags)
 }
 
 func (c *client) Handle() error {
+	defer c.Conn.Close()
+
 	// Expect NodeType.
 	var nodeType protocol.NodeType
 	if err := c.dec.Decode(&nodeType); err != nil {
@@ -47,12 +58,4 @@ func (c *client) Handle() error {
 	default:
 		return fmt.Errorf("invalid NodeType 0x%x", nodeType)
 	}
-}
-
-func (c *client) HandleTarget() error {
-	return nil
-}
-
-func (c *client) HandleSource() error {
-	return nil
 }
