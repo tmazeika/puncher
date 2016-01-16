@@ -29,13 +29,13 @@ func Start(c *cli.Context) {
 		appDir: c.GlobalString("app-dir"),
 	}
 
-	cert, err := Cert(a)
+	cert, err := Cert(&a)
 
 	if err != nil {
 		logging.Logger.Fatalln("error:", err)
 	}
 
-	err = Server(a, cert)
+	err = Server(&a, cert)
 
 	if err != nil {
 		logging.Logger.Fatalln("error:", err)

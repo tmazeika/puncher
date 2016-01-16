@@ -8,6 +8,8 @@ import (
 	"net"
 	"os"
 	"time"
+	"github.com/transhift/common/logging"
+	"github.com/transhift/common/protocol"
 )
 
 type server struct {
@@ -71,7 +73,7 @@ func (s server) Start(cert *tls.Certificate) error {
 			tcpConn, err := listener.AcceptTCP()
 
 			if err != nil {
-				Logger.Println("error:", err)
+				logging.Logger.Println("error:", err)
 				continue
 			}
 
@@ -79,7 +81,7 @@ func (s server) Start(cert *tls.Certificate) error {
 			c := client{
 				Conn:   tlsConn,
 				server: &s,
-				logger: log.New(os.Stdout, tcpConn.RemoteAddr().String(), LogFlags),
+				logger: log.New(os.Stdout, tcpConn.RemoteAddr().String(), logging.LogFlags),
 			}
 
 			if err := tcpConn.SetKeepAlive(true); err != nil {
