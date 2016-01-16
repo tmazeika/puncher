@@ -17,7 +17,6 @@ const (
 type args struct {
 	host   string
 	port   int
-	idLen  int
 	appDir string
 }
 
@@ -25,7 +24,6 @@ func Start(c *cli.Context) {
 	a := args{
 		host:   c.GlobalString("host"),
 		port:   c.GlobalInt("port"),
-		idLen:  c.GlobalInt("id-len"),
 		appDir: c.GlobalString("app-dir"),
 	}
 
@@ -53,7 +51,7 @@ func Cert(a *args) (*tls.Certificate, error) {
 }
 
 func Server(a *args, cert *tls.Certificate) error {
-	s := server.New(a.host, strconv.Itoa(a.port), uint(a.idLen))
+	s := server.New(a.host, strconv.Itoa(a.port))
 
 	if err := s.Start(cert); err != nil {
 		return err

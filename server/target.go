@@ -1,4 +1,5 @@
 package server
+/*
 
 import (
 	"crypto/rand"
@@ -77,3 +78,4 @@ func generateId(len uint) (string, error) {
 
 	return hex.EncodeToString(idBuff[:len]), nil
 }
+*/

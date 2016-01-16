@@ -1,4 +1,5 @@
 package server
+/*
 
 func (c client) handleSource() error {
 	c.logger.Println("identified as source")
@@ -13,3 +14,4 @@ func (c client) handleSource() error {
 
 	return nil
 }
+*/

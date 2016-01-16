@@ -22,11 +22,6 @@ func main() {
 			Value: 50977,
 			Usage: "port to bind to",
 		},
-		cli.IntFlag{
-			Name:  "id-len",
-			Value: 16,
-			Usage: "length of issued identifiers",
-		},
 		cli.StringFlag{
 			Name:  "app-dir",
 			Usage: "application directory",

@@ -10,7 +10,9 @@ import (
 	"errors"
 )
 
-var targets = map[string]*client
+var (
+	targets = make(map[string]*client)
+)
 
 type client struct {
 	net.Conn

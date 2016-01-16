@@ -2,28 +2,15 @@ package server
 
 import (
 	"crypto/tls"
-	"encoding/gob"
 	"log"
 	"net"
 	"time"
-	"github.com/transhift/common/protocol"
 	"github.com/transhift/puncher/client"
 )
 
 type server struct {
 	host string
 	port string
-}
-
-type target struct {
-	client
-
-	id       string
-	peerAddr chan<- *source
-}
-
-type source struct {
-	client
 }
 
 func New(host, port string) *server {
@@ -65,14 +52,14 @@ func (s server) listen() (<-chan *net.TCPConn, error) {
 	return ch, nil
 }
 
-func (s server) Start(cert tls.Certificate) error {
+func (s server) Start(cert *tls.Certificate) error {
 	ch, err := s.listen()
 
 	if err != nil {
 		return err
 	}
 
-	tlsConfig := tlsConfig(cert)
+	tlsConfig := tlsConfig(*cert)
 
 	go func() {
 		for {
@@ -108,6 +95,7 @@ func tlsConfig(cert tls.Certificate) *tls.Config {
 	}
 }
 
+/*
 func (c client) handle() {
 	defer c.Conn.Close()
 
@@ -144,3 +132,4 @@ func handleBadSig(logger *log.Logger, sig protocol.Signal) {
 		logger.Println("got unexpected signal")
 	}
 }
+*/
