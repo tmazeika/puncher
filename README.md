@@ -1,4 +1,4 @@
-# Puncher
+# Puncher [![Build Status](https://travis-ci.org/transhift/puncher.svg?branch=master)](https://travis-ci.org/transhift/puncher)
 
 TCP hole puncher for [Transhift](https://github.com/transhift/transhift).
 
