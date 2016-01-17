@@ -7,7 +7,6 @@ import (
 	"os"
 	"github.com/transhift/puncher/common/protocol"
 	"fmt"
-	"errors"
 )
 
 var (
@@ -47,16 +46,8 @@ func (c *client) Handle() error {
 	defer c.Conn.Close()
 
 	// Expect NodeType.
-	var nodeType protocol.NodeType
-	exitCh, msgCh, errCh := protocol.Inbound(c.dec)
-	select {
-	case <-exitCh:
-		return errors.New("exiting")
-	case <-msgCh:
-		if err := c.dec.Decode(&nodeType); err != nil {
-			return err
-		}
-	case err := <-errCh:
+	nodeType, err := c.expectNodeType()
+	if err != nil {
 		return err
 	}
 
@@ -68,4 +59,14 @@ func (c *client) Handle() error {
 	default:
 		return fmt.Errorf("invalid NodeType 0x%x", nodeType)
 	}
+}
+
+func (c *client) expectNodeType() (nodeType protocol.NodeType, err error) {
+	msgCh, errCh := protocol.Inbound(c.dec)
+	select {
+	case <-msgCh:
+		err = c.dec.Decode(&nodeType)
+	case err = <-errCh:
+	}
+	return
 }
