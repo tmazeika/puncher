@@ -7,11 +7,18 @@ import (
 	"os"
 	"github.com/transhift/puncher/common/protocol"
 	"fmt"
+	"sync"
 )
 
 var (
-	targets map[string]*client
+	targetPool = targetPool{}
 )
+
+type targetPool struct {
+	sync.RWMutex
+
+	pool map[string]*client
+}
 
 type client struct {
 	net.Conn
