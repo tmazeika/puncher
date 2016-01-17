@@ -4,6 +4,7 @@ go:
   - 1.5.2
 
 notifications:
+  email: false
   irc:
     channels:
       - secure: "mXIwRBQz/i3DWPxa/vI3+5UlDe2qinzJNsZFH9kwubuTfm8NtXw6sMxGhQ0IwbY4zooIToCmVLoh7u1ZnP+ddUzyinRSu1ZFXWhxO5JAQA29Z+/5v6zEpTtvWlEHlngMd/4sZimSPxtXs4D0hq0utD9JOdcQg+kfqg2Aocv+jHfsitbrozDytRFYy6BYlBP6CXU0WHOK9rZ2H4FydnEk4uTrUzAkNyuFW6QftvMdzf7Z+gnBXMmsBso6NYoy/FLMkaW0N9S5cFjqAh/DDV6k0Ad3aTu77Lawy9WTmDWMuD6/q05gjvaYYCrC/PjmzxnJ5fJEreIp3hXMaBQldoOm/ydmckUU7F1nuSUGGKjo0yMjkM058fTNA7tWOh1aRH9qdwlK3eps9K9ruMzrRvd3S7Diwm/L9YY7I/qSta50NZKF2tFP6P+2WsFgiz0DSDEPb/hMJxV77kLUbOzSQamX6x5zYbtvsG+pMSK6hSyUKf7wLn38z66fvK1OcxAflenz2o8SFq5JYqUHnGJCnvLOHrfZm267YTwbtp8ewJuNpnSF4n+wJqECbh8f5MnnIDzYurT5Y2OjYJb3akItvKazj2MaLn/ElzPe/+nnIh1zumxuwB+CYbwn37e7yoF3fp+kCSBr8scV4b0Ib8WqckYlgHBex4+JBtPSDq2UrJ3onFY="
@@ -12,3 +13,5 @@ notifications:
     password:
       secure: "oYJStxv5wprUd1qe/AX2CzSss1oC41rzNKwLUauEzDtzuUo+Db1WZMl1zSawa0H+p7W55brgHeWNeVCHiVCEbWDeToozJ2XWREAtXv9kDoe6tAL0VzF23i4A2XD94p11goid24Xa+6z02BT6Gy2IuZFgSZq6AzQzi/xaCANYUVFonn+aJFPGP649fD4Mc6RBCYTcVBGkrBn8BCrfuzKkGLYjciNXCalvqP0NXR2cmTmWQnit0EJ8iB6jJvKV+yQpcy0NCZ/9hq0tJXoNlGzn7WOEr71EpFrw91Gr4rEZyNSkzSP4adAtHsj1KHCTZcKs9IZGI8gUpkG64nP5o0fRsk8YTA/SUZHuu1zkMPtbr8LhU3WbdbRJNqtnVf01M7osDd0dqKtvX1ymXdAwkhQ8pYj0B1ZOTfp04Qnr4B+AEsjVTqRxpJX6rjyi+WQ8HZ8xEjD5278y7dhXTXHNCDZvE5wmNQvcwOS0inOvfsNzTO5izLGPP91Y6r7KOUkK9kSr/d91I+8aZ/Sjy1sgXrBkRvx2vIvrq1KIFtcbK6AMS+yTe2t/zR4sqdJtHKPdKp1W+hGmt8Y2hiSRDi3+0zPIRklOhZ2fp4nvmgm5B7uesMxwj2hNkMjZadsFN76OYg5KLUEwUyvzuzQHjavthC/TXPsrLHvtFhdqGhV7O/bhp3g="
     skip_join: true
+    template:
+      - "[\x039%{repository_name}\x0F/\x033%{branch}] \x0315%{author}\x0f built \x0314%{commit}\x0f: \x02%{message}\x0f (\x032\x1f%{build-url}\x0f)"
