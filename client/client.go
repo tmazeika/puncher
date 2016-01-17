@@ -17,7 +17,7 @@ var (
 type targetPool struct {
 	sync.RWMutex
 
-	pool map[string]*client
+	pool map[string]*target
 }
 
 type client struct {
@@ -29,7 +29,7 @@ type client struct {
 }
 
 type target struct {
-	client
+	*client
 
 	ready chan<- *client
 }
@@ -53,8 +53,8 @@ func (c *client) Handle() error {
 	defer c.Conn.Close()
 
 	// Expect NodeType.
-	nodeType, err := c.expectNodeType()
-	if err != nil {
+	var nodeType protocol.NodeType
+	if err := c.dec.Decode(&nodeType); err != nil {
 		return err
 	}
 
@@ -66,14 +66,4 @@ func (c *client) Handle() error {
 	default:
 		return fmt.Errorf("invalid NodeType 0x%x", nodeType)
 	}
-}
-
-func (c *client) expectNodeType() (nodeType protocol.NodeType, err error) {
-	msgCh, errCh := protocol.Inbound(c.dec)
-	select {
-	case <-msgCh:
-		err = c.dec.Decode(&nodeType)
-	case err = <-errCh:
-	}
-	return
 }

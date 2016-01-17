@@ -11,9 +11,19 @@ func (c *client) HandleTarget() error {
 		return err
 	}
 
+	t := target{
+		client: c,
+		ready:  make(chan *client),
+	}
+
 	targetPool.Lock()
-	target[id] = c
+	target[id] = t
 	targetPool.Unlock()
+
+	// Send ID.
+	if err := c.enc.Encode(id); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -25,14 +35,11 @@ func findOpenId() (string, error) {
 	var id string
 	for ok := false; !ok; _, ok = targetPool[id] {
 		i, err := generateId()
-
 		if err != nil {
 			return "", err
 		}
-
 		id = i
 	}
-
 	return id, nil
 }
 
