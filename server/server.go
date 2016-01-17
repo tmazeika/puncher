@@ -73,6 +73,8 @@ func (s server) Start(cert *tls.Certificate) error {
 			}
 
 			go func() {
+				defer tlsConn.Close()
+
 				if err := c.Handle(); err != nil {
 					c.Logger.Println("error:", err)
 				}

@@ -50,8 +50,6 @@ func logger(conn net.Conn) *log.Logger {
 }
 
 func (c *client) Handle() error {
-	defer c.Conn.Close()
-
 	// Expect NodeType.
 	var nodeType protocol.NodeType
 	if err := c.dec.Decode(&nodeType); err != nil {
