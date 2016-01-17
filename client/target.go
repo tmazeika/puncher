@@ -3,6 +3,7 @@ package client
 import (
 	"crypto/rand"
 	"encoding/hex"
+	"errors"
 )
 
 func (c *client) HandleTarget() error {
@@ -25,7 +26,14 @@ func (c *client) HandleTarget() error {
 		return err
 	}
 
-	return nil
+	// Wait for source ready.
+	s, ok := <-t.ready
+	if !ok {
+		return errors.New("read ready channel error")
+	}
+
+	// Send source address.
+	return c.enc.Encode(s.RemoteAddr().String())
 }
 
 func findOpenId() (string, error) {
