@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/codegangsta/cli"
-	"github.com/transhift/puncher/puncher"
+	"github.com/transhift/puncher/puncher/server"
 	"os"
 )
 
@@ -27,6 +27,6 @@ func main() {
 			Usage: "application directory",
 		},
 	}
-	app.Action = puncher.Start
+	app.Action = server.Start
 	app.Run(os.Args)
 }

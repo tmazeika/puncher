@@ -5,7 +5,7 @@ import (
 	"log"
 	"net"
 	"time"
-	"github.com/transhift/puncher/client"
+	"github.com/transhift/puncher/puncher/client"
 )
 
 type server struct {
@@ -13,7 +13,7 @@ type server struct {
 	port string
 }
 
-func New(host, port string) *server {
+func NewServer(host, port string) *server {
 	return &server{
 		host: host,
 		port: port,

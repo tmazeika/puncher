@@ -1,10 +1,9 @@
-package puncher
+package server
 
 import (
 	"strconv"
 	"github.com/codegangsta/cli"
 	"github.com/transhift/puncher/common/storage"
-	"github.com/transhift/puncher/server"
 	"crypto/tls"
 	"log"
 	"os"
@@ -39,7 +38,7 @@ func Start(c *cli.Context) {
 
 	log.Println("Starting server...")
 
-	if err := server.New(a.host, strconv.Itoa(a.port)).Start(cert); err != nil {
+	if err := NewServer(a.host, strconv.Itoa(a.port)).Start(cert); err != nil {
 		log.Fatalln("Error:", err)
 	}
 }
