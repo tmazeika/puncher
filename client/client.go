@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	targetPool = targetPool{}
+	targets = targetPool{}
 )
 
 type targetPool struct {
