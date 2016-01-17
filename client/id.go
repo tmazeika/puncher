@@ -10,7 +10,7 @@ func findOpenId() (string, error) {
 	defer targets.RUnlock()
 
 	var id string
-	for ok := false; !ok; _, ok = targetPool[id] {
+	for ok := false; !ok; _, ok = targets.pool[id] {
 		i, err := generateId()
 		if err != nil {
 			return "", err

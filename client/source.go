@@ -24,9 +24,10 @@ func (c *client) HandleSource() error {
 	return c.enc.Encode(t.Conn.RemoteAddr().String())
 }
 
-func FindTarget(id string) (*target, bool) {
+func FindTarget(id string) (t *target, ok bool) {
 	targets.RLock()
 	defer targets.RUnlock()
 
-	return targets.pool[id]
+	t, ok = targets.pool[id]
+	return
 }

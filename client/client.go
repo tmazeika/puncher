@@ -31,7 +31,7 @@ type client struct {
 type target struct {
 	*client
 
-	ready chan<- *client
+	ready chan *client
 }
 
 func New(conn net.Conn) *client {

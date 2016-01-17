@@ -14,7 +14,7 @@ func (c *client) HandleTarget() error {
 	}
 
 	targets.Lock()
-	targets.pool[id] = t
+	targets.pool[id] = &t
 	targets.Unlock()
 
 	// Send ID.
