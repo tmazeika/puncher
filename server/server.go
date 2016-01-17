@@ -38,12 +38,15 @@ func (s server) listen() (<-chan *net.TCPConn, error) {
 	ch := make(chan *net.TCPConn)
 
 	go func() {
+		log.Println("Listening @", l.Addr().String())
+
 		for {
 			conn, err := l.AcceptTCP()
 
 			if err != nil {
-				log.Println("error:", err)
+				log.Println("Error:", err)
 			} else {
+				log.Println("Accepted client:", conn)
 				ch <- conn
 			}
 		}
@@ -61,26 +64,24 @@ func (s server) Start(cert *tls.Certificate) error {
 
 	tlsConfig := tlsConfig(*cert)
 
-	go func() {
-		for {
-			tcpConn := <- ch
-			tlsConn := tls.Server(tcpConn, tlsConfig)
-			c := client.New(tlsConn)
+	for {
+		tcpConn := <- ch
+		tlsConn := tls.Server(tcpConn, tlsConfig)
+		c := client.New(tlsConn)
 
-			if err := useKeepAlive(tcpConn); err != nil {
-				c.Logger.Println("error:", err)
-				continue
-			}
-
-			go func() {
-				defer tlsConn.Close()
-
-				if err := c.Handle(); err != nil {
-					c.Logger.Println("error:", err)
-				}
-			}()
+		if err := useKeepAlive(tcpConn); err != nil {
+			c.Logger.Println("error:", err)
+			continue
 		}
-	}()
+
+		go func() {
+			defer tlsConn.Close()
+
+			if err := c.Handle(); err != nil {
+				c.Logger.Println("error:", err)
+			}
+		}()
+	}
 
 	return nil
 }

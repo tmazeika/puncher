@@ -6,7 +6,8 @@ import (
 	"github.com/transhift/common/storage"
 	"github.com/transhift/puncher/server"
 	"crypto/tls"
-	"github.com/transhift/common/logging"
+	"log"
+	"os"
 )
 
 const (
@@ -21,6 +22,9 @@ type args struct {
 }
 
 func Start(c *cli.Context) {
+	log.SetOutput(os.Stdout)
+	log.SetFlags(log.Ldate | log.Ltime | log.LUTC | log.Lshortfile)
+
 	a := args{
 		host:   c.GlobalString("host"),
 		port:   c.GlobalInt("port"),
@@ -30,13 +34,13 @@ func Start(c *cli.Context) {
 	cert, err := Cert(&a)
 
 	if err != nil {
-		logging.Logger.Fatalln("error:", err)
+		log.Fatalln("Error:", err)
 	}
 
-	err = Server(&a, cert)
+	log.Println("Starting server...")
 
-	if err != nil {
-		logging.Logger.Fatalln("error:", err)
+	if err := server.New(a.host, strconv.Itoa(a.port)).Start(cert); err != nil {
+		log.Fatalln("Error:", err)
 	}
 }
 
@@ -48,14 +52,4 @@ func Cert(a *args) (*tls.Certificate, error) {
 	}
 
 	return s.Certificate(CertName, KeyName)
-}
-
-func Server(a *args, cert *tls.Certificate) error {
-	s := server.New(a.host, strconv.Itoa(a.port))
-
-	if err := s.Start(cert); err != nil {
-		return err
-	}
-
-	return nil
 }
