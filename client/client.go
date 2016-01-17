@@ -17,10 +17,9 @@ var (
 type client struct {
 	net.Conn
 
-	version string
-	logger  *log.Logger
-	enc     *gob.Encoder
-	dec     *gob.Decoder
+	logger *log.Logger
+	enc    *gob.Encoder
+	dec    *gob.Decoder
 }
 
 type target struct {
