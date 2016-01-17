@@ -23,7 +23,7 @@ type targetPool struct {
 type client struct {
 	net.Conn
 
-	logger *log.Logger
+	Logger *log.Logger
 	enc    *gob.Encoder
 	dec    *gob.Decoder
 }
@@ -37,7 +37,7 @@ type target struct {
 func New(conn net.Conn) *client {
 	return &client{
 		Conn:   conn,
-		logger: logger(conn),
+		Logger: logger(conn),
 		enc:    gob.NewEncoder(conn),
 		dec:    gob.NewDecoder(conn),
 	}

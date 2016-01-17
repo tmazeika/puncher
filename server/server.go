@@ -68,10 +68,15 @@ func (s server) Start(cert *tls.Certificate) error {
 			c := client.New(tlsConn)
 
 			if err := useKeepAlive(tcpConn); err != nil {
-				log.Println("error:", err)
+				c.Logger.Println("error:", err)
+				continue
 			}
 
-			go c.Handle()
+			go func() {
+				if err := c.Handle(); err != nil {
+					c.Logger.Println("error:", err)
+				}
+			}()
 		}
 	}()
 
