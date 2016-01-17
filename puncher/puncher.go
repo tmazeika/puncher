@@ -3,7 +3,7 @@ package puncher
 import (
 	"strconv"
 	"github.com/codegangsta/cli"
-	"github.com/transhift/common/storage"
+	"github.com/transhift/puncher/common/storage"
 	"github.com/transhift/puncher/server"
 	"crypto/tls"
 	"log"
