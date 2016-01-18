@@ -46,7 +46,7 @@ func (s server) listen() (<-chan *net.TCPConn, error) {
 			if err != nil {
 				log.Println("Error:", err)
 			} else {
-				log.Println("Accepted client:", conn)
+				log.Println("Accepted client:", conn.RemoteAddr().String())
 				ch <- conn
 			}
 		}
