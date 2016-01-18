@@ -5,6 +5,8 @@ import (
 	"github.com/codegangsta/cli"
 	"log"
 	"os"
+	"github.com/transhift/appdir"
+	"github.com/transhift/common/security"
 )
 
 type args struct {
@@ -23,7 +25,15 @@ func Start(c *cli.Context) {
 		appDir: c.GlobalString("app-dir"),
 	}
 
-	cert, err := Certificate(&a)
+	const DefAppDir = "$HOME/.transhift"
+	dir, err := appdir.NewPreferNonEmpty(a.appDir, DefAppDir)
+	if err != nil {
+		log.Fatalln("error:", err)
+	}
+
+	const KeyName = "pcert.key"
+	const CertName = "pcert.pem"
+	cert, err := security.Certificate(KeyName, CertName, dir)
 	if err != nil {
 		log.Fatalln("error:", err)
 	}
