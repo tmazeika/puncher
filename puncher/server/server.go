@@ -55,14 +55,14 @@ func (s server) listen() (<-chan *net.TCPConn, error) {
 	return ch, nil
 }
 
-func (s server) Start(cert *tls.Certificate) error {
+func (s server) Start(cert tls.Certificate) error {
 	ch, err := s.listen()
 
 	if err != nil {
 		return err
 	}
 
-	tlsConfig := tlsConfig(*cert)
+	tlsConfig := tlsConfig(cert)
 
 	for {
 		tcpConn := <- ch

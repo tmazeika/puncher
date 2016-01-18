@@ -24,14 +24,13 @@ func Start(c *cli.Context) {
 	}
 
 	cert, err := Certificate(&a)
-
 	if err != nil {
-		log.Fatalln("Error:", err)
+		log.Fatalln("error:", err)
 	}
 
 	log.Println("Starting server...")
 
 	if err := NewServer(a.host, strconv.Itoa(a.port)).Start(cert); err != nil {
-		log.Fatalln("Error:", err)
+		log.Fatalln("error:", err)
 	}
 }

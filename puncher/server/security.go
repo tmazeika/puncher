@@ -10,7 +10,7 @@ import (
 	"os"
 )
 
-func Certificate(a *args) (cert *tls.Certificate, err error) {
+func Certificate(a *args) (cert tls.Certificate, err error) {
 	const KeyName  = "pcert.key"
 	const CertName = "pcert.pem"
 	const FileMode = 0600
@@ -20,11 +20,11 @@ func Certificate(a *args) (cert *tls.Certificate, err error) {
 		return
 	}
 
-	var privKey rsa.PrivateKey
+	var privKey *rsa.PrivateKey
 	// Read or generate private key.
 	if err = dir.IfExistsOrOtherwise(KeyName, func(b []byte) (err error) {
 		p, _ := pem.Decode(b)
-		privKey, err = x509.ParsePKCS1PrivateKey(p)
+		privKey, err = x509.ParsePKCS1PrivateKey(p.Bytes)
 		return
 	}, func(file *os.File) (b []byte, err error) {
 		// Set file mode.
@@ -47,6 +47,5 @@ func Certificate(a *args) (cert *tls.Certificate, err error) {
 	}); err != nil {
 		return
 	}
-
 	return tls.LoadX509KeyPair(dir.FilePath(CertName), dir.FilePath(KeyName))
 }
