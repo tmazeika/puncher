@@ -38,7 +38,7 @@ func Start(c *cli.Context) {
 		log.Fatalln("error:", err)
 	}
 
-	log.Println("Starting server...")
+	log.Println("starting server...")
 
 	if err := NewServer(a.host, strconv.Itoa(a.port)).Start(cert); err != nil {
 		log.Fatalln("error:", err)

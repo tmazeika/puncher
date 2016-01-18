@@ -45,7 +45,7 @@ func New(conn net.Conn) *client {
 
 func logger(conn net.Conn) *log.Logger {
 	const Flags = log.Ldate | log.Ltime | log.LUTC | log.Lshortfile
-	prefix := conn.RemoteAddr().String()
+	prefix := "[" + conn.RemoteAddr().String() + "] "
 	return log.New(os.Stdout, prefix, Flags)
 }
 

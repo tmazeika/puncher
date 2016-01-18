@@ -33,15 +33,15 @@ func (s server) listen() (<-chan *net.TCPConn, error) {
 	ch := make(chan *net.TCPConn)
 
 	go func() {
-		log.Println("Listening @", l.Addr().String())
+		log.Println("listening @", l.Addr().String())
 
 		for {
 			conn, err := l.AcceptTCP()
 
 			if err != nil {
-				log.Println("Error:", err)
+				log.Println("error:", err)
 			} else {
-				log.Println("Accepted client:", conn.RemoteAddr().String())
+				log.Println("accepted client:", conn.RemoteAddr().String())
 				ch <- conn
 			}
 		}
@@ -72,6 +72,7 @@ func (s server) Start(cert tls.Certificate) error {
 			if err := c.Handle(); err != nil {
 				c.Logger.Println("error:", err)
 			}
+			c.Logger.Println("disconnected")
 		}()
 	}
 
