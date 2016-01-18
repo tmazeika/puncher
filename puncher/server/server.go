@@ -31,6 +31,7 @@ func (s server) listen() (<-chan *net.TCPConn, error) {
 		return nil, err
 	}
 	ch := make(chan *net.TCPConn)
+	client.Initialize()
 
 	go func() {
 		log.Println("listening @", l.Addr().String())

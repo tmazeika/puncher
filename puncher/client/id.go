@@ -5,19 +5,17 @@ import (
 	"encoding/hex"
 )
 
-func findOpenId() (string, error) {
+func findOpenId() (id string, err error) {
 	targets.RLock()
 	defer targets.RUnlock()
 
-	var id string
-	for ok := false; !ok; _, ok = targets.pool[id] {
-		i, err := generateId()
+	for ok := true; ok; _, ok = targets.pool[id] {
+		id, err = generateId()
 		if err != nil {
-			return "", err
+			break
 		}
-		id = i
 	}
-	return id, nil
+	return
 }
 
 func generateId() (string, error) {

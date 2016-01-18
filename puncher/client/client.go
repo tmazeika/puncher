@@ -34,6 +34,10 @@ type target struct {
 	ready chan *client
 }
 
+func Initialize() {
+	targets.pool = map[string]*target{}
+}
+
 func New(conn net.Conn) *client {
 	return &client{
 		Conn:   conn,
