@@ -22,19 +22,14 @@ func NewServer(host, port string) *server {
 
 func (s server) listen() (<-chan *net.TCPConn, error) {
 	const Net = "tcp"
-
 	laddr, err := net.ResolveTCPAddr(Net, net.JoinHostPort(s.host, s.port))
-
 	if err != nil {
 		return nil, err
 	}
-
 	l, err := net.ListenTCP(Net, laddr)
-
 	if err != nil {
 		return nil, err
 	}
-
 	ch := make(chan *net.TCPConn)
 
 	go func() {
@@ -57,7 +52,6 @@ func (s server) listen() (<-chan *net.TCPConn, error) {
 
 func (s server) Start(cert tls.Certificate) error {
 	ch, err := s.listen()
-
 	if err != nil {
 		return err
 	}
@@ -68,7 +62,6 @@ func (s server) Start(cert tls.Certificate) error {
 		tcpConn := <- ch
 		tlsConn := tls.Server(tcpConn, tlsConfig)
 		c := client.New(tlsConn)
-
 		if err := useKeepAlive(tcpConn); err != nil {
 			c.Logger.Println("error:", err)
 			continue
@@ -76,7 +69,6 @@ func (s server) Start(cert tls.Certificate) error {
 
 		go func() {
 			defer tlsConn.Close()
-
 			if err := c.Handle(); err != nil {
 				c.Logger.Println("error:", err)
 			}
@@ -88,11 +80,9 @@ func (s server) Start(cert tls.Certificate) error {
 
 func useKeepAlive(conn *net.TCPConn) error {
 	const Period = time.Second * 30
-
 	if err := conn.SetKeepAlive(true); err != nil {
 		return err
 	}
-
 	return conn.SetKeepAlivePeriod(Period)
 }
 
