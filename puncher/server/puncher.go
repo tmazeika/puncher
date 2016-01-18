@@ -3,15 +3,8 @@ package server
 import (
 	"strconv"
 	"github.com/codegangsta/cli"
-	"github.com/transhift/puncher/common/storage"
-	"crypto/tls"
 	"log"
 	"os"
-)
-
-const (
-	CertName = "pcert.pem"
-	KeyName  = "pcert.key"
 )
 
 type args struct {
@@ -30,7 +23,7 @@ func Start(c *cli.Context) {
 		appDir: c.GlobalString("app-dir"),
 	}
 
-	cert, err := Cert(&a)
+	cert, err := Certificate(&a)
 
 	if err != nil {
 		log.Fatalln("Error:", err)
@@ -41,14 +34,4 @@ func Start(c *cli.Context) {
 	if err := NewServer(a.host, strconv.Itoa(a.port)).Start(cert); err != nil {
 		log.Fatalln("Error:", err)
 	}
-}
-
-func Cert(a *args) (*tls.Certificate, error) {
-	s, err := storage.New(a.appDir, nil)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return s.Certificate(CertName, KeyName)
 }
