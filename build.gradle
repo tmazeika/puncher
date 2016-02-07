@@ -10,5 +10,12 @@ repositories {
 }
 
 dependencies {
+    // Google Guice
+    compile 'com.google.inject:guice:4.0'
+
+    // Apache Log4j
+    compile 'org.apache.logging.log4j:log4j-core:2.5' // core
+    compile 'org.apache.logging.log4j:log4j-api:2.5'  // api
+
     testCompile 'junit:junit:4.12'
 }
