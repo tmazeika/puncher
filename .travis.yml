@@ -1,7 +1,7 @@
-language: go
+language: java
 
-go:
-  - 1.5.2
+jdk:
+  - oraclejdk8
 
 notifications:
   email: false
