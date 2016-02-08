@@ -10,6 +10,9 @@ repositories {
 }
 
 dependencies {
+    // Netty
+    compile 'io.netty:netty-all:5.0.0.Alpha2'
+
     // Google Guice
     compile 'com.google.inject:guice:4.0'
 
