@@ -12,6 +12,7 @@ public class ServerModule extends AbstractModule
     protected void configure()
     {
         bind(Server.class).to(NettyServer.class);
+        bind(IdPool.class).to(ClientIdPool.class);
     }
 
     @Provides
