@@ -23,6 +23,16 @@ public class Puncher
         }
     }
 
+    /**
+     * Parses CLI arguments with JCommander. Takes a model to load options into
+     * and the program arguments to parse.
+     *
+     * @param cli the model to load options into
+     * @param args the arguments to parse
+     *
+     * @return {@code true} for success <em>and</em> the '--help' flag was not
+     * passed
+     */
     private static boolean parseCli(CliModel cli, String[] args)
     {
         final JCommander commands;
