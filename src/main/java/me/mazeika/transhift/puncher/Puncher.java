@@ -6,7 +6,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import me.mazeika.transhift.puncher.cli.CliModel;
 import me.mazeika.transhift.puncher.modules.ServerModule;
-import me.mazeika.transhift.puncher.server.IServer;
+import me.mazeika.transhift.puncher.server.Server;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -19,7 +19,7 @@ public class Puncher
         final Injector injector = Guice.createInjector(new ServerModule());
 
         if (parseCli(injector.getInstance(CliModel.class), args)) {
-            injector.getInstance(IServer.class).start();
+            injector.getInstance(Server.class).start();
         }
     }
 
