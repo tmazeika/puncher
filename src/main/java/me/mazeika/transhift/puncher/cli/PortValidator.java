@@ -23,7 +23,7 @@ public class PortValidator implements IParameterValidator
         }
     }
 
-    private void throwInvalid(String value) throws ParameterException
+    private void throwInvalid(String value)
     {
         throw new ParameterException(String.format(
                 "'%s' is not a valid port number", value));
