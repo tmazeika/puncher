@@ -62,7 +62,7 @@ public class NettyServer implements Server
         private final ChannelHandler initHandler;
 
         @Inject
-        public Initializer(@Named("init") ChannelHandler initHandler)
+        public Initializer(@Named("init-h") ChannelHandler initHandler)
         {
             this.initHandler = initHandler;
         }

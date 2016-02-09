@@ -16,7 +16,7 @@ public class ServerModule extends AbstractModule
         bind(IdMapper.class).to(IdMapperImpl.class);
         bind(Server.class).to(NettyServer.class);
 
-        bind(ChannelHandler.class).annotatedWith(Names.named("init"))
+        bind(ChannelHandler.class).annotatedWith(Names.named("init-h"))
                 .to(InitHandler.class);
         bind(ChannelHandler.class).annotatedWith(Names.named("dialable-h"))
                 .to(IdDialableHandler.class);
