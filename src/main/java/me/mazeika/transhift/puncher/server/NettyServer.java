@@ -15,6 +15,7 @@ import org.apache.logging.log4j.Logger;
 public class NettyServer implements Server
 {
     private static final int BACKLOG = 64;
+
     private static final Logger logger = LogManager.getLogger();
 
     private final CliModel cli;
