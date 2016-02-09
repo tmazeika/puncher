@@ -8,10 +8,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Singleton
-public class ClientIdPool implements IdPool
+public class IdPoolImpl implements IdPool
 {
-    public static int ID_LEN = 16;
-
     private static final SecureRandom random = new SecureRandom();
 
     private final Set<byte[]> pool = new HashSet<>();

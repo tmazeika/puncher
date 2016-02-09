@@ -2,6 +2,8 @@ package me.mazeika.transhift.puncher.server;
 
 public interface IdPool
 {
+    int ID_LEN = 16;
+
     /**
      * Generates a new, random, unique, and valid ID, automatically adding it to
      * the pool. Thread-safe.

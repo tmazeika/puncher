@@ -11,8 +11,9 @@ public class ServerModule extends AbstractModule
     @Override
     protected void configure()
     {
+        bind(Client.class).to(ClientImpl.class);
+        bind(IdPool.class).to(IdPoolImpl.class);
         bind(Server.class).to(NettyServer.class);
-        bind(IdPool.class).to(ClientIdPool.class);
     }
 
     @Provides
