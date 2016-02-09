@@ -13,7 +13,7 @@ public class CliModel
     private String host = "127.0.0.1";
 
     @Parameter(names = { "--port", "-p" }, description = "The port to bind to.",
-            validateWith = PortValidator.class)
+            validateWith = CliPortValidator.class)
     private int port = 50977;
 
     public boolean isHelp()

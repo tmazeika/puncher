@@ -3,7 +3,7 @@ package me.mazeika.transhift.puncher.cli;
 import com.beust.jcommander.IParameterValidator;
 import com.beust.jcommander.ParameterException;
 
-public class PortValidator implements IParameterValidator
+public class CliPortValidator implements IParameterValidator
 {
     @Override
     public void validate(String name, String value) throws ParameterException
