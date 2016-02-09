@@ -8,7 +8,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 
 @Singleton
 public class IdPoolImpl implements IdPool
@@ -40,8 +39,7 @@ public class IdPoolImpl implements IdPool
     {
         synchronized (map) {
             return map.entrySet().stream()
-                    .filter(entry ->
-                            Arrays.equals(entry.getKey(), id))
+                    .filter(entry -> Arrays.equals(entry.getKey(), id))
                     .map(Map.Entry::getValue)
                     .findAny();
         }
