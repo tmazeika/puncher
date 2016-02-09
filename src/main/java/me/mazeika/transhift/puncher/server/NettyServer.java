@@ -2,6 +2,7 @@ package me.mazeika.transhift.puncher.server;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.google.inject.name.Named;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -57,18 +58,19 @@ public class NettyServer implements Server
 
     private static class Initializer extends ChannelInitializer<SocketChannel>
     {
-        private final Provider<ChannelHandler[]> channelHandlerProvider;
+        private final Provider<ChannelHandler> initHandlerProvider;
 
         @Inject
-        public Initializer(Provider<ChannelHandler[]> channelHandlerProvider)
+        public Initializer(
+                @Named("init") Provider<ChannelHandler> initHandlerProvider)
         {
-            this.channelHandlerProvider = channelHandlerProvider;
+            this.initHandlerProvider = initHandlerProvider;
         }
 
         @Override
         protected void initChannel(SocketChannel ch) throws Exception
         {
-            ch.pipeline().addLast(channelHandlerProvider.get());
+            ch.pipeline().addLast(initHandlerProvider.get());
         }
     }
 }

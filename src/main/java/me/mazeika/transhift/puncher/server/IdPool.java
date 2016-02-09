@@ -1,21 +1,34 @@
 package me.mazeika.transhift.puncher.server;
 
+import io.netty.channel.ChannelHandlerContext;
+
+import java.util.Optional;
+
 public interface IdPool
 {
-    int ID_LEN = 16;
+    int ID_LENGTH = 16;
 
     /**
-     * Generates a new, random, unique, and valid ID, automatically adding it to
-     * the pool. Thread-safe.
+     * Generates a new, random, unique, and valid ID for the given context,
+     * adding the mapping between the ID and context to the map. Thread-safe.
      *
-     * @return the generated ID
+     * @param ctx the context to generate an ID for
      */
-    byte[] generate();
+    byte[] generateFor(ChannelHandlerContext ctx);
 
     /**
-     * Removes the given ID from the pool. Thread-safe.
+     * Finds the context mapped from the given ID.
      *
-     * @param id the ID to remove
+     * @param id the ID of the context to find
+     *
+     * @return an Optional of the found context; empty if not found
      */
-    void remove(byte[] id);
+    Optional<ChannelHandlerContext> find(byte[] id);
+
+    /**
+     * Removes the mapping between the given context and its ID. Thread-safe.
+     *
+     * @param ctx the context to remove the mapping for
+     */
+    void remove(ChannelHandlerContext ctx);
 }
