@@ -4,7 +4,10 @@ import io.netty.channel.ChannelHandlerContext;
 
 import java.util.Optional;
 
-public interface IdPool
+/**
+ * Maps a unique 16 byte ID to a {@link ChannelHandlerContext}.
+ */
+public interface IdMapper
 {
     int ID_LENGTH = 16;
 

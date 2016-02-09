@@ -13,7 +13,7 @@ public class ServerModule extends AbstractModule
     @Override
     protected void configure()
     {
-        bind(IdPool.class).to(IdPoolImpl.class);
+        bind(IdMapper.class).to(IdMapperImpl.class);
         bind(Server.class).to(NettyServer.class);
 
         bind(ChannelHandler.class).annotatedWith(Names.named("init"))

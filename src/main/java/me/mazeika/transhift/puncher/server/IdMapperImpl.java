@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @Singleton
-public class IdPoolImpl implements IdPool
+public class IdMapperImpl implements IdMapper
 {
     private static final SecureRandom random = new SecureRandom();
 

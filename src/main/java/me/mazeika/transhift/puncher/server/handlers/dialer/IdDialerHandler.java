@@ -5,7 +5,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ReplayingDecoder;
-import me.mazeika.transhift.puncher.server.IdPool;
 
 import java.util.List;
 
@@ -17,6 +16,6 @@ public class IdDialerHandler extends ReplayingDecoder<Void>
                           List<Object> out) throws Exception
     {
         // read in ID
-//        ctx.attr(Attributes.ID).set(in.readBytes(IdPool.ID_LENGTH).array());
+//        ctx.attr(Attributes.ID).set(in.readBytes(IdMapper.ID_LENGTH).array());
     }
 }
