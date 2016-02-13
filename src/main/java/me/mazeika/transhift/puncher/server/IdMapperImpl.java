@@ -19,7 +19,7 @@ public class IdMapperImpl implements IdMapper
     @Override
     public byte[] generateFor(ChannelHandlerContext ctx)
     {
-        byte[] id = new byte[ID_LENGTH];
+        final byte[] id = new byte[ID_LENGTH];
 
         synchronized (map) {
             do {

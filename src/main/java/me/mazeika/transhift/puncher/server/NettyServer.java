@@ -59,18 +59,19 @@ public class NettyServer implements Server
 
     private static class Initializer extends ChannelInitializer<SocketChannel>
     {
-        private final ChannelHandler initHandler;
+        private final Provider<ChannelHandler> initHandlerProvider;
 
         @Inject
-        public Initializer(@Named("init-h") ChannelHandler initHandler)
+        public Initializer(
+                @Named("init-h") Provider<ChannelHandler> initHandlerProvider)
         {
-            this.initHandler = initHandler;
+            this.initHandlerProvider = initHandlerProvider;
         }
 
         @Override
-        protected void initChannel(SocketChannel ch) throws Exception
+        protected void initChannel(SocketChannel ch)
         {
-            ch.pipeline().addLast(initHandler);
+            ch.pipeline().addLast(initHandlerProvider.get());
         }
     }
 }

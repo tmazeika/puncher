@@ -5,8 +5,11 @@ import com.beust.jcommander.ParameterException;
 
 public class CliPortValidator implements IParameterValidator
 {
+    private static final int MIN_PORT = 0x0000;
+    private static final int MAX_PORT = 0xffff;
+
     @Override
-    public void validate(String name, String value) throws ParameterException
+    public void validate(String name, String value)
     {
         final int port;
 
@@ -18,7 +21,7 @@ public class CliPortValidator implements IParameterValidator
             return;
         }
 
-        if (port < 0x0000 || port > 0xffff) {
+        if (port < MIN_PORT || port > MAX_PORT) {
             throwInvalid(value);
         }
     }

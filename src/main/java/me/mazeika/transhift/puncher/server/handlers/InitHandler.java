@@ -1,7 +1,6 @@
 package me.mazeika.transhift.puncher.server.handlers;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler;
@@ -12,7 +11,6 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.List;
 
-@Singleton @ChannelHandler.Sharable
 public class InitHandler extends ReplayingDecoder<Void>
 {
     private static final byte DIALABLE_BYTE = 0x00;

@@ -20,7 +20,7 @@ public interface IdMapper
     byte[] generateFor(ChannelHandlerContext ctx);
 
     /**
-     * Finds the context mapped from the given ID.
+     * Finds the context mapped from the given ID. Thread-safe.
      *
      * @param id the ID of the context to find
      *
