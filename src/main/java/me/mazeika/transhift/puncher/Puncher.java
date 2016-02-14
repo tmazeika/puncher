@@ -1,55 +1,46 @@
 package me.mazeika.transhift.puncher;
 
-import com.beust.jcommander.JCommander;
-import com.beust.jcommander.ParameterException;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import me.mazeika.transhift.puncher.cli.CliModel;
+import joptsimple.OptionParser;
+import joptsimple.OptionSet;
+import joptsimple.OptionSpec;
+import me.mazeika.transhift.puncher.modules.ArgsModule;
 import me.mazeika.transhift.puncher.modules.ServerModule;
-import me.mazeika.transhift.puncher.server.Server;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.io.IOException;
 
 public class Puncher
 {
     private static final Logger logger = LogManager.getLogger();
 
-    public static void main(String[] args) throws Exception
+    public static void main(String[] args) throws IOException
     {
-        final Injector injector = Guice.createInjector(new ServerModule());
+        // parse program arguments
+        final OptionParser parser = new OptionParser();
 
-        if (parseCli(injector.getInstance(CliModel.class), args)) {
-            injector.getInstance(Server.class).start();
+        parser.printHelpOn(System.out);
+        final OptionSpec<Void> help =
+                parser.accepts("help", "Shows this help.")
+                        .forHelp();
+        final OptionSpec<String> host =
+                parser.accepts("host", "The host to bind to.")
+                        .withRequiredArg()
+                        .defaultsTo("127.0.0.1");
+        final OptionSpec<Integer> port =
+                parser.accepts("port", "The port to bind to.")
+                        .withRequiredArg()
+                        .ofType(int.class)
+                        .defaultsTo(50977);
+        final OptionSet options = parser.parse(args);
+
+        if (! options.has(help)) {
+            // start
+            final Injector injector = Guice.createInjector(
+                    new ArgsModule(options, host, port),
+                    new ServerModule());
         }
-    }
-
-    /**
-     * Parses CLI arguments with JCommander. Takes a model to load options into
-     * and the program arguments to parse.
-     *
-     * @param cli the model to load options into
-     * @param args the arguments to parse
-     *
-     * @return {@code true} for success <em>and</em> the '--help' flag was not
-     * passed
-     */
-    private static boolean parseCli(CliModel cli, String[] args)
-    {
-        final JCommander commands;
-
-        try {
-            commands = new JCommander(cli, args);
-        }
-        catch (ParameterException e) {
-            logger.error(e.getMessage());
-            return false;
-        }
-
-        if (cli.isHelp()) {
-            commands.setProgramName("puncher");
-            commands.usage();
-        }
-
-        return ! cli.isHelp();
     }
 }
