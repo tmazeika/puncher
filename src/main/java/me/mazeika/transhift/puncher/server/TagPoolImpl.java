@@ -6,7 +6,7 @@ import java.security.SecureRandom;
 import java.util.*;
 
 @Singleton
-public class IdPoolImpl implements IdPool
+public class TagPoolImpl implements TagPool
 {
     private static final SecureRandom random = new SecureRandom();
 
@@ -15,18 +15,18 @@ public class IdPoolImpl implements IdPool
     @Override
     public byte[] generate()
     {
-        final byte[] id = new byte[ID_LENGTH];
+        final byte[] tag = new byte[ID_LENGTH];
 
         synchronized (pool) {
             do {
-                random.nextBytes(id);
+                random.nextBytes(tag);
             }
-            while (pool.stream().anyMatch(o -> Arrays.equals(o, id)));
+            while (pool.stream().anyMatch(o -> Arrays.equals(o, tag)));
 
-            pool.add(id);
+            pool.add(tag);
         }
 
-        return id.clone();
+        return tag.clone();
     }
 
     @Override
