@@ -11,6 +11,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 public class Puncher
 {
@@ -20,8 +21,6 @@ public class Puncher
     {
         // parse program arguments
         final OptionParser parser = new OptionParser();
-
-        parser.printHelpOn(System.out);
         final OptionSpec<Void> help =
                 parser.accepts("help", "Shows this help.")
                         .forHelp();
@@ -36,7 +35,9 @@ public class Puncher
                         .defaultsTo(50977);
         final OptionSet options = parser.parse(args);
 
-        if (! options.has(help)) {
+        if (options.has(help)) {
+            parser.printHelpOn(System.out);
+        } else {
             // start
             final Injector injector = Guice.createInjector(
                     new ArgsModule(options, host, port),

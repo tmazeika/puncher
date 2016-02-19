@@ -9,21 +9,21 @@ import java.io.IOException;
 import java.net.SocketAddress;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.util.function.Consumer;
+import java.util.Queue;
 
 public class Acceptor extends AbstractExecutionThreadService
 {
     private final SocketAddress bindAddress;
-    private final Consumer<SocketChannel> consumer;
+    private final Queue<SocketChannel> queue;
 
     private ServerSocketChannel ch;
 
     @Inject
     public Acceptor(@BindAddress SocketAddress bindAddress,
-                    @Sockets Consumer<SocketChannel> consumer)
+                    @Sockets Queue<SocketChannel> queue)
     {
         this.bindAddress = bindAddress;
-        this.consumer = consumer;
+        this.queue = queue;
     }
 
     @Override
@@ -37,7 +37,7 @@ public class Acceptor extends AbstractExecutionThreadService
     protected void run() throws IOException
     {
         while (isRunning()) {
-            consumer.accept(ch.accept());
+            queue.offer(ch.accept());
         }
     }
 
