@@ -9,6 +9,8 @@ import me.mazeika.transhift.puncher.binding_annotations.BindAddress;
 import me.mazeika.transhift.puncher.binding_annotations.Sockets;
 import me.mazeika.transhift.puncher.server.SelectorProvider;
 import me.mazeika.transhift.puncher.server.Server;
+import me.mazeika.transhift.puncher.server.TagPool;
+import me.mazeika.transhift.puncher.server.TagPoolImpl;
 
 import javax.inject.Singleton;
 import java.io.IOException;
@@ -25,6 +27,7 @@ public class ServerModule extends AbstractModule
     @Override
     protected void configure()
     {
+        bind(TagPool.class).to(TagPoolImpl.class);
     }
 
     @Provides @Singleton @BindAddress
