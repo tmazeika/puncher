@@ -7,6 +7,7 @@ import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import me.mazeika.transhift.puncher.modules.ArgsModule;
 import me.mazeika.transhift.puncher.modules.ServerModule;
+import me.mazeika.transhift.puncher.server.Server;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -42,6 +43,8 @@ public class Puncher
             final Injector injector = Guice.createInjector(
                     new ArgsModule(options, host, port),
                     new ServerModule());
+
+            injector.getInstance(Server.class).start();
         }
     }
 }

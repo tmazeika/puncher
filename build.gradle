@@ -13,6 +13,9 @@ dependencies {
     compile 'com.google.inject.extensions:guice-assistedinject:4.0'
     compile 'com.google.inject.extensions:guice-throwingproviders:4.0'
 
+    // Grizzly
+    compile 'org.glassfish.grizzly:grizzly-framework:2.3.22'
+
     // JOpt Simple
     compile 'net.sf.jopt-simple:jopt-simple:5.0-beta-1'
 

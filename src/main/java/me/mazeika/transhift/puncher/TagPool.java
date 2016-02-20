@@ -1,4 +1,4 @@
-package me.mazeika.transhift.puncher.server;
+package me.mazeika.transhift.puncher;
 
 /**
  * Represents a pool of unique 16 byte tags.
