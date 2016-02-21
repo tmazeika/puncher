@@ -30,10 +30,10 @@ public class TagPoolImpl implements TagPool
     }
 
     @Override
-    public void remove(byte[] id)
+    public void remove(byte[] tag)
     {
         synchronized (pool) {
-            pool.removeIf(o -> Arrays.equals(o, id));
+            pool.removeIf(o -> Arrays.equals(o, tag));
         }
     }
 }
