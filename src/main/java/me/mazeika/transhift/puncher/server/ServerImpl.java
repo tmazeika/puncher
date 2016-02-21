@@ -4,26 +4,28 @@ import me.mazeika.transhift.puncher.binding_annotations.Args;
 import me.mazeika.transhift.puncher.server.filters.EchoFilter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.glassfish.grizzly.Connection;
 import org.glassfish.grizzly.filterchain.FilterChainBuilder;
 import org.glassfish.grizzly.filterchain.TransportFilter;
 import org.glassfish.grizzly.nio.transport.TCPNIOServerConnection;
 import org.glassfish.grizzly.nio.transport.TCPNIOTransport;
 import org.glassfish.grizzly.nio.transport.TCPNIOTransportBuilder;
-import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.grizzly.ssl.SSLFilter;
 
 import javax.inject.Inject;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLContextSpi;
 import java.io.IOException;
+import java.net.SocketAddress;
 import java.util.concurrent.TimeUnit;
 
 public class ServerImpl implements Server
 {
     private static final Logger logger = LogManager.getLogger();
 
+    private final Object lock = new Object();
     private final String host;
     private final int port;
+
+    private boolean shuttingDown;
 
     @Inject
     public ServerImpl(@Args.Host String host, @Args.Port int port)
@@ -49,11 +51,17 @@ public class ServerImpl implements Server
 
         // try to shutdown gracefully on JVM termination
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            shuttingDown = true;
+
+            synchronized (lock) {
+                lock.notify();
+            }
+
             transport.shutdown(5, TimeUnit.SECONDS);
         }));
 
         try {
-            final TCPNIOServerConnection conn = transport.bind(host, port);
+            final Connection conn = transport.bind(host, port);
 
             transport.start();
             logger.info("Listening at {}", conn.getLocalAddress());
@@ -66,6 +74,16 @@ public class ServerImpl implements Server
             }
             catch (IOException e1) {
                 logger.error(e1.getMessage(), e1);
+            }
+        }
+
+        // wait for JVM shutdown
+        synchronized (lock) {
+            while (! shuttingDown) {
+                try {
+                    lock.wait();
+                }
+                catch (InterruptedException ignored) { }
             }
         }
     }
