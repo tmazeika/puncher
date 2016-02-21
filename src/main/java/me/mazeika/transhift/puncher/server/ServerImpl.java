@@ -1,10 +1,11 @@
 package me.mazeika.transhift.puncher.server;
 
 import me.mazeika.transhift.puncher.binding_annotations.Args;
-import me.mazeika.transhift.puncher.server.filters.EchoFilter;
+import me.mazeika.transhift.puncher.server.filters.RemoteTypeFilter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.glassfish.grizzly.Connection;
+import org.glassfish.grizzly.filterchain.Filter;
 import org.glassfish.grizzly.filterchain.FilterChainBuilder;
 import org.glassfish.grizzly.filterchain.TransportFilter;
 import org.glassfish.grizzly.nio.NIOTransport;
@@ -22,14 +23,17 @@ public class ServerImpl implements Server
     private final Object lock = new Object();
     private final String host;
     private final int port;
+    private final Filter[] filters;
 
     private boolean shuttingDown;
 
     @Inject
-    public ServerImpl(@Args.Host String host, @Args.Port int port)
+    public ServerImpl(@Args.Host String host, @Args.Port int port,
+                      Filter[] filters)
     {
         this.host = host;
         this.port = port;
+        this.filters = filters;
     }
 
     @Override
@@ -39,10 +43,7 @@ public class ServerImpl implements Server
         final NIOTransport transport =
                 TCPNIOTransportBuilder.newInstance().build();
 
-        builder.add(new TransportFilter())
-               .add(new SSLFilter())
-               .add(new EchoFilter());
-
+        builder.addAll(filters);
         transport.setProcessor(builder.build());
 
         // try to shutdown gracefully on JVM termination
