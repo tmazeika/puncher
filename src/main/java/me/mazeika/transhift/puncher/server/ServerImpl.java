@@ -7,14 +7,12 @@ import org.apache.logging.log4j.Logger;
 import org.glassfish.grizzly.Connection;
 import org.glassfish.grizzly.filterchain.FilterChainBuilder;
 import org.glassfish.grizzly.filterchain.TransportFilter;
-import org.glassfish.grizzly.nio.transport.TCPNIOServerConnection;
-import org.glassfish.grizzly.nio.transport.TCPNIOTransport;
+import org.glassfish.grizzly.nio.NIOTransport;
 import org.glassfish.grizzly.nio.transport.TCPNIOTransportBuilder;
 import org.glassfish.grizzly.ssl.SSLFilter;
 
 import javax.inject.Inject;
 import java.io.IOException;
-import java.net.SocketAddress;
 import java.util.concurrent.TimeUnit;
 
 public class ServerImpl implements Server
@@ -37,15 +35,13 @@ public class ServerImpl implements Server
     @Override
     public void start()
     {
-        final FilterChainBuilder builder =
-                FilterChainBuilder.stateless();
+        final FilterChainBuilder builder = FilterChainBuilder.stateless();
+        final NIOTransport transport =
+                TCPNIOTransportBuilder.newInstance().build();
 
         builder.add(new TransportFilter())
                .add(new SSLFilter())
                .add(new EchoFilter());
-
-        final TCPNIOTransport transport =
-                TCPNIOTransportBuilder.newInstance().build();
 
         transport.setProcessor(builder.build());
 
