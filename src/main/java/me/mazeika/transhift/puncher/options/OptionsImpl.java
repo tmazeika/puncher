@@ -10,7 +10,7 @@ public class OptionsImpl implements Options
     private final int port;
 
     @Inject
-    public OptionsImpl(@Assisted String host, @Assisted int port)
+    public OptionsImpl(@Assisted final String host, @Assisted final int port)
     {
         this.host = host;
         this.port = port;
