@@ -1,7 +1,12 @@
 apply plugin: 'java'
+apply plugin: 'application'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
+
+configurations {
+    quasar
+}
 
 repositories {
     mavenCentral()
@@ -20,3 +25,12 @@ dependencies {
     // JUnit
     testCompile 'junit:junit:4.12'
 }
+
+mainClassName = 'me.mazeika.transhift.puncher.Puncher'
+
+run {
+    // noinspection GroovyAssignabilityCheck
+    args '127.0.0.1', 50978
+}
+
+defaultTasks 'run'
