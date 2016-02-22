@@ -54,7 +54,15 @@ public class ServerImpl implements Server
                         processorProvider.get().process(socket);
                     }
                     catch (IOException e) {
-                        logger.warn(e.getMessage(), e);
+                        logger.info("{}: closing",
+                                socket.getRemoteSocketAddress());
+                    }
+                    finally {
+                        try {
+                            socket.close();
+                        }
+                        catch (IOException ignored) {
+                        }
                     }
                 });
             }
