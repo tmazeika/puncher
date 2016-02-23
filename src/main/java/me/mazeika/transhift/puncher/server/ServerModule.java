@@ -9,10 +9,6 @@ public class ServerModule extends AbstractModule
     protected void configure()
     {
         bind(Acceptor.class).to(AcceptorImpl.class);
-        bind(Attributes.class).to(AttributesImpl.class);
-
-//        bind(Key.class).annotatedWith().to(KeyImpl.class);
-
         bind(Processor.class).to(ProcessorImpl.class);
         bind(Server.class).to(ServerImpl.class);
     }
