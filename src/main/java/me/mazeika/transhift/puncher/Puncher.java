@@ -3,9 +3,9 @@ package me.mazeika.transhift.puncher;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
-import me.mazeika.transhift.puncher.modules.OptionsModule;
-import me.mazeika.transhift.puncher.modules.PipelineModule;
-import me.mazeika.transhift.puncher.modules.ServerModule;
+import me.mazeika.transhift.puncher.options.OptionsModule;
+import me.mazeika.transhift.puncher.pipeline.PipelineModule;
+import me.mazeika.transhift.puncher.server.ServerModule;
 import me.mazeika.transhift.puncher.pipeline.Pipeline;
 import me.mazeika.transhift.puncher.server.Server;
 

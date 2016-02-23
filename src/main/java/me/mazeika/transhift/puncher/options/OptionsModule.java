@@ -1,10 +1,8 @@
-package me.mazeika.transhift.puncher.modules;
+package me.mazeika.transhift.puncher.options;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
-import me.mazeika.transhift.puncher.options.Options;
-import me.mazeika.transhift.puncher.options.OptionsImpl;
 
 import javax.inject.Singleton;
 

@@ -1,8 +1,6 @@
-package me.mazeika.transhift.puncher.modules;
+package me.mazeika.transhift.puncher.pipeline;
 
 import com.google.inject.AbstractModule;
-import me.mazeika.transhift.puncher.pipeline.Pipeline;
-import me.mazeika.transhift.puncher.pipeline.PipelineImpl;
 
 import javax.inject.Singleton;
 
