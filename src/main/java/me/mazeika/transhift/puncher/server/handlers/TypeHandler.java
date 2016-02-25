@@ -5,7 +5,7 @@ import java.net.Socket;
 public class TypeHandler implements Handler
 {
     @Override
-    public void handle(Socket socket) throws Exception
+    public void handle(final Socket socket) throws Exception
     {
 
     }
