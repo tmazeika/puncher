@@ -5,7 +5,7 @@ import com.google.inject.assistedinject.Assisted;
 import javax.inject.Inject;
 import java.util.Arrays;
 
-public class TagImpl implements TagIntern
+class TagImpl implements TagIntern
 {
     private final byte[] b;
 

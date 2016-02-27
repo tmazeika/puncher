@@ -12,7 +12,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class ServerImpl implements Server
+class ServerImpl implements Server
 {
     private static final Logger logger = LogManager.getLogger();
     private static final ExecutorService exec = Executors.newCachedThreadPool();

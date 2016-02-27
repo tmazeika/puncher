@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
 
-public class ProcessorImpl implements Processor
+class ProcessorImpl implements Processor
 {
     private static final Logger logger = LogManager.getLogger();
 

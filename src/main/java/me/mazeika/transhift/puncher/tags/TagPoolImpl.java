@@ -7,7 +7,7 @@ import java.security.SecureRandom;
 import java.util.*;
 
 @Singleton
-public class TagPoolImpl implements TagPool
+class TagPoolImpl implements TagPool
 {
     private static final SecureRandom random = new SecureRandom();
 
@@ -42,11 +42,11 @@ public class TagPoolImpl implements TagPool
     }
 
     @Override
-    public void remove(final Tag tag)
+    public boolean remove(final Tag tag)
     {
         synchronized (pool) {
             // noinspection SuspiciousMethodCalls
-            pool.remove(tag);
+            return pool.remove(tag);
         }
     }
 }

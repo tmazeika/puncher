@@ -4,7 +4,7 @@ import com.google.inject.assistedinject.Assisted;
 
 import javax.inject.Inject;
 
-public class OptionsImpl implements Options
+class OptionsImpl implements Options
 {
     private final String host;
     private final int port;

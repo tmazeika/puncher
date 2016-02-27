@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.Optional;
 
-public class RemoteImpl implements Remote
+class RemoteImpl implements Remote
 {
     private final Socket socket;
 

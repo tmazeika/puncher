@@ -19,6 +19,8 @@ public interface TagPool
      * Removes the given tag from the pool. Thread-safe.
      *
      * @param tag the tag to remove
+     *
+     * @return whether the tag was removed
      */
-    void remove(Tag tag);
+    boolean remove(Tag tag);
 }

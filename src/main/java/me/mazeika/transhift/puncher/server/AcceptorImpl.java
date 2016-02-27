@@ -15,7 +15,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
-public class AcceptorImpl implements Acceptor
+class AcceptorImpl implements Acceptor
 {
     private static final Logger logger = LogManager.getLogger();
 
