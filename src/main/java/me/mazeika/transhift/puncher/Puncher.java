@@ -11,6 +11,8 @@ import me.mazeika.transhift.puncher.server.Server;
 import me.mazeika.transhift.puncher.server.handlers.HandlerModule;
 import me.mazeika.transhift.puncher.tags.TagModule;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 
 public class Puncher
@@ -24,13 +26,13 @@ public class Puncher
                 new TagModule(),
                 new HandlerModule());
 
-        // start
-        injector.getInstance(Server.class).start();
-
         // add shutdown hook
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             injector.getInstance(Key.get(
                     Pipeline.class, Pipeline.Shutdown.class)).fire();
         }));
+
+        // start
+        injector.getInstance(Server.class).start();
     }
 }

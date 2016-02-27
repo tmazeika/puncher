@@ -1,6 +1,5 @@
 package me.mazeika.transhift.puncher.server;
 
-import java.io.IOException;
 import java.net.Socket;
 
 public interface Processor
@@ -10,7 +9,7 @@ public interface Processor
      *
      * @param socket the socket to process
      *
-     * @throws IOException
+     * @throws Exception
      */
-    void process(Socket socket) throws IOException;
+    void process(Socket socket) throws Exception;
 }

@@ -13,14 +13,14 @@ class TypeHandler implements Handler
 {
     private static final Logger logger = LogManager.getLogger();
 
-    private final Provider<TagConsumptionHandler> tagConsumptionHandlerProvider;
-    private final Provider<TagProductionHandler> tagProductionHandlerProvider;
+    private final Provider<Handler> tagConsumptionHandlerProvider;
+    private final Provider<Handler> tagProductionHandlerProvider;
 
     @Inject
     public TypeHandler(
-            @Handler.TagConsumption final Provider<TagConsumptionHandler>
+            @Handler.TagConsumption final Provider<Handler>
                     tagConsumptionHandlerProvider,
-            @Handler.TagProduction final Provider<TagProductionHandler>
+            @Handler.TagProduction final Provider<Handler>
                     tagProductionHandlerProvider)
     {
         this.tagConsumptionHandlerProvider = tagConsumptionHandlerProvider;
@@ -44,7 +44,7 @@ class TypeHandler implements Handler
             }
         }
         else {
-            logger.debug("{}: got wrong RemoteType: {}", remote,
+            logger.debug("{}: got wrong RemoteType: 0x{}", remote,
                     Integer.toHexString(b));
         }
     }

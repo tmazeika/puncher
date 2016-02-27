@@ -1,6 +1,6 @@
 package me.mazeika.transhift.puncher.tags;
 
-interface TagIntern extends Tag
+public interface TagIntern extends Tag
 {
     /**
      * Gets the backing byte array.

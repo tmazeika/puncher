@@ -1,28 +1,26 @@
 package me.mazeika.transhift.puncher.server;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import me.mazeika.transhift.puncher.server.handlers.Handler;
 
-import java.io.IOException;
-import java.io.InputStream;
+import javax.inject.Inject;
 import java.net.Socket;
 
 class ProcessorImpl implements Processor
 {
-    private static final Logger logger = LogManager.getLogger();
+    private final Remote.Factory remoteFactory;
+    private final Handler firstHandler;
+
+    @Inject
+    public ProcessorImpl(final Remote.Factory remoteFactory,
+                         @Handler.Type final Handler firstHandler)
+    {
+        this.remoteFactory = remoteFactory;
+        this.firstHandler = firstHandler;
+    }
 
     @Override
-    public void process(final Socket socket) throws IOException
+    public void process(final Socket socket) throws Exception
     {
-        final InputStream in = socket.getInputStream();
-
-        // temporary echo
-        while (true) {
-            final int b = in.read();
-
-            logger.trace("{}: read byte 0x{}", socket.getRemoteSocketAddress(),
-                    Integer.toHexString(b));
-            socket.getOutputStream().write(b);
-        }
+        firstHandler.handle(remoteFactory.create(socket));
     }
 }
