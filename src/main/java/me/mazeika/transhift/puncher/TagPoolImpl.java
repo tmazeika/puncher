@@ -2,6 +2,7 @@ package me.mazeika.transhift.puncher;
 
 import com.google.inject.Singleton;
 
+import javax.inject.Inject;
 import java.security.SecureRandom;
 import java.util.*;
 
@@ -10,30 +11,42 @@ public class TagPoolImpl implements TagPool
 {
     private static final SecureRandom random = new SecureRandom();
 
-    private final Collection<byte[]> pool = new HashSet<>();
+    private final Collection<TagIntern> pool = new HashSet<>();
+    private final TagIntern.Factory tagInternFactory;
+
+    @Inject
+    public TagPoolImpl(final TagIntern.Factory tagInternFactory)
+    {
+        this.tagInternFactory = tagInternFactory;
+    }
 
     @Override
-    public byte[] generate()
+    public Tag generate()
     {
-        final byte[] tag = new byte[ID_LENGTH];
+        final byte[] b = new byte[LENGTH];
+        final TagIntern tag;
 
         synchronized (pool) {
             do {
-                random.nextBytes(tag);
+                random.nextBytes(b);
             }
-            while (pool.stream().anyMatch(o -> Arrays.equals(o, tag)));
+            while (pool.stream().anyMatch(o ->
+                    Arrays.equals(o.intern(), b)));
+
+            tag = tagInternFactory.create(b);
 
             pool.add(tag);
         }
 
-        return tag.clone();
+        return tag;
     }
 
     @Override
-    public void remove(byte[] tag)
+    public void remove(final Tag tag)
     {
         synchronized (pool) {
-            pool.removeIf(o -> Arrays.equals(o, tag));
+            // noinspection SuspiciousMethodCalls
+            pool.remove(tag);
         }
     }
 }
