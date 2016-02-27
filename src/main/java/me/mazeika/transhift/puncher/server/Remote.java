@@ -30,6 +30,20 @@ public interface Remote
     byte[] waitAndRead(int n) throws IOException;
 
     /**
+     * Reads a byte from the socket's {@link InputStream}, throwing an
+     * error if it couldn't be read.
+     *
+     * @return the read byte
+     *
+     * @throws IOException when an error occurs with the socket or the byte
+     * couldn't be read
+     */
+    default byte waitAndRead() throws IOException
+    {
+        return waitAndRead(1)[0];
+    }
+
+    /**
      * Gets an optional describing the tag.
      *
      * @return an optional describing the tag

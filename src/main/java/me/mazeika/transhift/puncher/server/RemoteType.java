@@ -5,7 +5,14 @@ import java.util.stream.Stream;
 
 public enum RemoteType
 {
+    /**
+     * The remote that wants <em>to</em> dial its peer.
+     */
     SOURCE(0x00),
+
+    /**
+     * The remote that wants to <em>be</em> dialed by its peer.
+     */
     TARGET(0x01);
 
     private final byte b;

@@ -8,6 +8,7 @@ import me.mazeika.transhift.puncher.pipeline.PipelineModule;
 import me.mazeika.transhift.puncher.server.ServerModule;
 import me.mazeika.transhift.puncher.pipeline.Pipeline;
 import me.mazeika.transhift.puncher.server.Server;
+import me.mazeika.transhift.puncher.server.handlers.HandlerModule;
 import me.mazeika.transhift.puncher.tags.TagModule;
 
 import java.io.IOException;
@@ -20,7 +21,8 @@ public class Puncher
                 new OptionsModule(args),
                 new PipelineModule(),
                 new ServerModule(),
-                new TagModule());
+                new TagModule(),
+                new HandlerModule());
 
         // start
         injector.getInstance(Server.class).start();

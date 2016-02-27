@@ -49,4 +49,10 @@ class RemoteImpl implements Remote
     {
         this.tag = tag;
     }
+
+    @Override
+    public String toString()
+    {
+        return socket.getRemoteSocketAddress().toString();
+    }
 }
