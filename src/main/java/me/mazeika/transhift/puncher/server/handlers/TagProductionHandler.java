@@ -11,6 +11,6 @@ class TagProductionHandler implements Handler
     @Override
     public void handle(final Remote remote) throws Exception
     {
-        logger.trace("TagProductionHandler#handle");
+
     }
 }

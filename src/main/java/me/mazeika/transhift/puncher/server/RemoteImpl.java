@@ -5,6 +5,7 @@ import me.mazeika.transhift.puncher.tags.Tag;
 
 import javax.inject.Inject;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.Socket;
 import java.util.Optional;
 
@@ -30,9 +31,16 @@ class RemoteImpl implements Remote
     public byte[] waitAndRead(int n) throws IOException
     {
         final byte[] b = new byte[n];
+        final InputStream in = socket.getInputStream();
 
-        if (socket.getInputStream().read(b) != n) {
-            throw new IOException(n + " byte(s) not read");
+        int tempB;
+
+        for (int i = 0; i < n; i++) {
+            if ((tempB = in.read()) == -1) {
+                throw new IllegalStateException("eof");
+            }
+
+            b[i] = (byte) tempB;
         }
 
         return b;

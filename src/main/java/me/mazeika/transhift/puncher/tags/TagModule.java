@@ -10,6 +10,11 @@ public class TagModule extends AbstractModule
     {
         bind(TagPool.class).to(TagPoolImpl.class);
 
+        // install Tag.Factory
+        install(new FactoryModuleBuilder()
+                .implement(Tag.class, TagImpl.class)
+                .build(Tag.Factory.class));
+
         // install TagIntern.Factory
         install(new FactoryModuleBuilder()
                 .implement(TagIntern.class, TagImpl.class)

@@ -8,7 +8,7 @@ public enum RemoteType
     /**
      * The remote that wants <em>to</em> dial its peer.
      */
-    SOURCE(0x00),
+    SOURCE(0x66),
 
     /**
      * The remote that wants to <em>be</em> dialed by its peer.

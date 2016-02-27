@@ -12,6 +12,11 @@ class TagImpl implements TagIntern
     @Inject
     public TagImpl(@Assisted final byte[] b)
     {
+        if (b.length != Tag.LENGTH) {
+            throw new IllegalArgumentException("Tag length must be " +
+                    Tag.LENGTH + ", but got " + b.length);
+        }
+
         this.b = b;
     }
 
@@ -25,6 +30,24 @@ class TagImpl implements TagIntern
     public byte[] intern()
     {
         return b;
+    }
+
+    @Override
+    public String toString()
+    {
+        final StringBuilder builder = new StringBuilder(b.length * 2);
+
+        builder.append("0x");
+
+        for (byte e : b) {
+            if (e < 0x10) {
+                builder.append("0");
+            }
+
+            builder.append(Integer.toHexString(e));
+        }
+
+        return builder.toString();
     }
 
     @Override

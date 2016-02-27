@@ -27,6 +27,12 @@ public class TagTest
         tag = new TagImpl(b);
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void testConstructor()
+    {
+        new TagImpl(new byte[Tag.LENGTH - 1]);
+    }
+
     @Test
     public void testGet()
     {

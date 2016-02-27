@@ -10,4 +10,16 @@ public interface Tag
      * @return the backing byte[]
      */
     byte[] get();
+
+    interface Factory
+    {
+        /**
+         * Creates a new {@link Tag} instance.
+         *
+         * @param b the tag's byte[]
+         *
+         * @return a new Tag instance
+         */
+        Tag create(byte[] b);
+    }
 }

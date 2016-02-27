@@ -49,11 +49,12 @@ class ServerImpl implements Server
 
                 exec.execute(() -> {
                     try {
-                        logger.debug("{}: processing",
-                                socket.getRemoteSocketAddress());
                         processorProvider.get().process(socket);
                     }
-                    catch (Exception ignored) { }
+                    catch (Exception e) {
+                        logger.warn(socket.getRemoteSocketAddress() +
+                                " error: " + e.getMessage(), e);
+                    }
                     finally {
                         try {
                             socket.close();
