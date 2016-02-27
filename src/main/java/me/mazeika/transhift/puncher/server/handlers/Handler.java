@@ -1,8 +1,8 @@
 package me.mazeika.transhift.puncher.server.handlers;
 
-import java.net.Socket;
+import me.mazeika.transhift.puncher.server.Remote;
 
 public interface Handler
 {
-    void handle(Socket socket) throws Exception;
+    void handle(Remote remote) throws Exception;
 }

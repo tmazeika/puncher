@@ -1,11 +1,11 @@
 package me.mazeika.transhift.puncher.server.handlers;
 
-import java.net.Socket;
+import me.mazeika.transhift.puncher.server.Remote;
 
 public class TypeHandler implements Handler
 {
     @Override
-    public void handle(final Socket socket) throws Exception
+    public void handle(final Remote remote) throws Exception
     {
 
     }
