@@ -30,14 +30,14 @@ public class TagTest
     @Test
     public void testGet()
     {
-        assertThat(tag.get(), is(b));
+        assertThat(tag.get(), is(b.clone()));
         assertThat(tag.get(), is(not(sameInstance(b))));
     }
 
     @Test
     public void testIntern()
     {
-        assertThat(tag.intern(), is(b));
+        assertThat(tag.intern(), is(b.clone()));
         assertThat(tag.intern(), is(sameInstance(b)));
     }
 
