@@ -6,17 +6,22 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 class TagConsumptionHandler implements Handler
 {
     private static final Logger logger = LogManager.getLogger();
 
     private final Tag.Factory tagFactory;
+    private final Provider<Handler> tagSearchHandlerProvider;
 
     @Inject
-    public TagConsumptionHandler(final Tag.Factory tagFactory)
+    public TagConsumptionHandler(final Tag.Factory tagFactory,
+                                 @Handler.Search final Provider<Handler>
+                                         tagSearchHandlerProvider)
     {
         this.tagFactory = tagFactory;
+        this.tagSearchHandlerProvider = tagSearchHandlerProvider;
     }
 
     @Override
@@ -27,5 +32,7 @@ class TagConsumptionHandler implements Handler
         remote.setTag(tag);
 
         logger.debug("{}: received tag {}", remote, tag.toString());
+
+        tagSearchHandlerProvider.get().handle(remote);
     }
 }

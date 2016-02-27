@@ -32,4 +32,7 @@ public interface Handler
 
     @BindingAnnotation @Target({ FIELD, PARAMETER, METHOD }) @Retention(RUNTIME)
     @interface TagProduction { }
+
+    @BindingAnnotation @Target({ FIELD, PARAMETER, METHOD }) @Retention(RUNTIME)
+    @interface Search { }
 }
