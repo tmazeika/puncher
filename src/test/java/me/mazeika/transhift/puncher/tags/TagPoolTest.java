@@ -11,7 +11,7 @@ public class TagPoolTest
     private TagPool tagPool;
 
     @Before
-    public void setUp()
+    public void before()
     {
         tagPool = new TagPoolImpl(TagImpl::new);
     }
