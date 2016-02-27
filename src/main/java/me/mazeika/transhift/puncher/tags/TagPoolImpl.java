@@ -23,7 +23,7 @@ class TagPoolImpl implements TagPool
     @Override
     public Tag generate()
     {
-        final byte[] b = new byte[LENGTH];
+        final byte[] b = new byte[Tag.LENGTH];
         final TagIntern tag;
 
         synchronized (pool) {

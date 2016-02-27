@@ -5,8 +5,6 @@ package me.mazeika.transhift.puncher.tags;
  */
 public interface TagPool
 {
-    int LENGTH = 16;
-
     /**
      * Generates a new, random, and unique tag, automatically adding it to the
      * pool. Thread-safe.
