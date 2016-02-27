@@ -8,7 +8,7 @@ class PipelineImpl implements Pipeline
     private final Collection<Runnable> workers = new HashSet<>();
 
     @Override
-    public void register(Runnable handler)
+    public void register(final Runnable handler)
     {
         workers.add(handler);
     }

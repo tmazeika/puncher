@@ -10,8 +10,16 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 public interface Pipeline
 {
-    void register(Runnable runnable);
+    /**
+     * Registers the given handler to be run with {@link #fire()}.
+     *
+     * @param handler the handler
+     */
+    void register(Runnable handler);
 
+    /**
+     * Fires all registered handlers, possibly in parallel.
+     */
     void fire();
 
     // pipeline types

@@ -19,7 +19,7 @@ public interface Options
     interface Factory
     {
         /**
-         * Creates an Options instance.
+         * Creates an {@link Options} instance.
          *
          * @param host the host, see {@link #getHost()} for valid input
          * @param port the port, see {@link #getPort()} for valid input
