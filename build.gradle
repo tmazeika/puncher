@@ -30,7 +30,7 @@ mainClassName = 'me.mazeika.transhift.puncher.Puncher'
 
 run {
     // noinspection GroovyAssignabilityCheck
-    args '127.0.0.1', 50978
+    args '127.0.0.1', 50977
 }
 
 defaultTasks 'run'
