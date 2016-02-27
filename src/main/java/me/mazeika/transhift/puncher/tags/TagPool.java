@@ -1,5 +1,9 @@
 package me.mazeika.transhift.puncher.tags;
 
+import me.mazeika.transhift.puncher.server.Remote;
+
+import java.util.Optional;
+
 /**
  * Represents a pool of unique 16 byte tags.
  */
@@ -7,18 +11,19 @@ public interface TagPool
 {
     /**
      * Generates a new, random, and unique tag, automatically adding it to the
-     * pool. Thread-safe.
+     * pool, for the given remote. Thread-safe.
      *
-     * @return the generated tag
+     * @param remote the remote to map the tag to
      */
-    Tag generate();
+    void generateFor(Remote remote);
 
     /**
-     * Removes the given tag from the pool. Thread-safe.
+     * Finds and removes the given tag from the pool, returning an Optional
+     * describing its associated {@link Remote}. Thread-safe.
      *
      * @param tag the tag to remove
      *
-     * @return whether the tag was removed
+     * @return an Optional describing the associated Remote
      */
-    boolean remove(Tag tag);
+    Optional<Remote> findAndRemove(Tag tag);
 }

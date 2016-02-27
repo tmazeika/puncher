@@ -15,7 +15,7 @@ public class TagTest
     private static final byte TEST_VALUE = (byte) 0xcd;
 
     private byte[] b;
-    private TagIntern tag;
+    private Tag tag;
 
     @Before
     public void before()
@@ -41,10 +41,18 @@ public class TagTest
     }
 
     @Test
-    public void testIntern()
+    public void testEqualsArray()
     {
-        assertThat(tag.intern(), is(b.clone()));
-        assertThat(tag.intern(), is(sameInstance(b)));
+        final byte[] otherB = new byte[Tag.LENGTH];
+        final byte[] otherBadB = new byte[Tag.LENGTH];
+
+        Arrays.fill(otherB, TEST_VALUE);
+        Arrays.fill(otherBadB, TEST_VALUE);
+
+        otherBadB[0] = TEST_VALUE - 1;
+
+        assertThat(tag.equalsArray(otherB), is(true));
+        assertThat(tag.equalsArray(otherBadB), is(false));
     }
 
     @Test

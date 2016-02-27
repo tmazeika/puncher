@@ -14,10 +14,5 @@ public class TagModule extends AbstractModule
         install(new FactoryModuleBuilder()
                 .implement(Tag.class, TagImpl.class)
                 .build(Tag.Factory.class));
-
-        // install TagIntern.Factory
-        install(new FactoryModuleBuilder()
-                .implement(TagIntern.class, TagImpl.class)
-                .build(TagIntern.Factory.class));
     }
 }

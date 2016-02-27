@@ -11,6 +11,15 @@ public interface Tag
      */
     byte[] get();
 
+    /**
+     * Gets if the given array is equal to the backing byte array of this.
+     *
+     * @param b the byte[] to compare to
+     *
+     * @return {@code true} if the arrays are equal, {@code false} otherwise
+     */
+    boolean equalsArray(byte[] b);
+
     interface Factory
     {
         /**

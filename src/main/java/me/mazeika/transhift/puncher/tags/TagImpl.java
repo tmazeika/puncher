@@ -5,7 +5,7 @@ import com.google.inject.assistedinject.Assisted;
 import javax.inject.Inject;
 import java.util.Arrays;
 
-class TagImpl implements TagIntern
+class TagImpl implements Tag
 {
     private final byte[] b;
 
@@ -27,9 +27,9 @@ class TagImpl implements TagIntern
     }
 
     @Override
-    public byte[] intern()
+    public boolean equalsArray(final byte[] b)
     {
-        return b;
+        return Arrays.equals(this.b, b);
     }
 
     @Override
@@ -51,7 +51,7 @@ class TagImpl implements TagIntern
     }
 
     @Override
-    public boolean equals(Object o)
+    public boolean equals(final Object o)
     {
         if (this == o) {
             return true;
