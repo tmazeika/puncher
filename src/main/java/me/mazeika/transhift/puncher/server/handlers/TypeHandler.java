@@ -44,7 +44,7 @@ class TypeHandler implements Handler
             }
         }
         else {
-            logger.debug("{}: got wrong RemoteType: 0x{}", remote,
+            logger.debug("{}: got wrong RemoteType 0x{}", remote,
                     Integer.toHexString(b));
         }
     }
