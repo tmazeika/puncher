@@ -1,4 +1,4 @@
-package me.mazeika.transhift.puncher;
+package me.mazeika.transhift.puncher.tags;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.assistedinject.FactoryModuleBuilder;

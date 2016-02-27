@@ -1,5 +1,7 @@
 package me.mazeika.transhift.puncher;
 
+import me.mazeika.transhift.puncher.tags.TagPool;
+import me.mazeika.transhift.puncher.tags.TagPoolImpl;
 import org.junit.Before;
 import org.junit.Test;
 

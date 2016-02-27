@@ -1,6 +1,6 @@
 package me.mazeika.transhift.puncher.server;
 
-import me.mazeika.transhift.puncher.Tag;
+import me.mazeika.transhift.puncher.tags.Tag;
 
 import java.net.Socket;
 
