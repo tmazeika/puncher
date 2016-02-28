@@ -1,4 +1,4 @@
-package me.mazeika.transhift.puncher.tags;
+package me.mazeika.transhift.puncher.server;
 
 public interface Tag
 {

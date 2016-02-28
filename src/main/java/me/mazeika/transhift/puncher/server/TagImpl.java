@@ -1,4 +1,4 @@
-package me.mazeika.transhift.puncher.tags;
+package me.mazeika.transhift.puncher.server;
 
 import com.google.inject.assistedinject.Assisted;
 
@@ -12,9 +12,9 @@ class TagImpl implements Tag
     @Inject
     public TagImpl(@Assisted final byte[] b)
     {
-        if (b.length != Tag.LENGTH) {
+        if (b.length != LENGTH) {
             throw new IllegalArgumentException("Tag length must be " +
-                    Tag.LENGTH + ", but got " + b.length);
+                    LENGTH + ", but got " + b.length);
         }
 
         this.b = b;

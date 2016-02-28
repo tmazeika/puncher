@@ -12,10 +12,16 @@ public class ServerModule extends AbstractModule
         bind(Acceptor.class).to(AcceptorImpl.class);
         bind(Processor.class).to(ProcessorImpl.class);
         bind(Server.class).to(ServerImpl.class);
+        bind(TagPool.class).to(TagPoolImpl.class);
 
         // install Remote.Factory
         install(new FactoryModuleBuilder()
                 .implement(Remote.class, RemoteImpl.class)
                 .build(Remote.Factory.class));
+
+        // install Tag.Factory
+        install(new FactoryModuleBuilder()
+                .implement(Tag.class, TagImpl.class)
+                .build(Tag.Factory.class));
     }
 }

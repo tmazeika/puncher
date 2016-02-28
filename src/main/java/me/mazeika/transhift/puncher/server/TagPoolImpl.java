@@ -1,7 +1,6 @@
-package me.mazeika.transhift.puncher.tags;
+package me.mazeika.transhift.puncher.server;
 
 import com.google.inject.Singleton;
-import me.mazeika.transhift.puncher.server.Remote;
 
 import javax.inject.Inject;
 import java.security.SecureRandom;

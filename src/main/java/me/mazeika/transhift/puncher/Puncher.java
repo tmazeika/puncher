@@ -9,10 +9,7 @@ import me.mazeika.transhift.puncher.server.ServerModule;
 import me.mazeika.transhift.puncher.pipeline.Pipeline;
 import me.mazeika.transhift.puncher.server.Server;
 import me.mazeika.transhift.puncher.server.handlers.HandlerModule;
-import me.mazeika.transhift.puncher.tags.TagModule;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 
 public class Puncher

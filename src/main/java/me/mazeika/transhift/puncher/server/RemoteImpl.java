@@ -1,7 +1,6 @@
 package me.mazeika.transhift.puncher.server;
 
 import com.google.inject.assistedinject.Assisted;
-import me.mazeika.transhift.puncher.tags.Tag;
 
 import javax.inject.Inject;
 import java.io.IOException;

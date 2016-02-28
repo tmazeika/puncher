@@ -1,7 +1,5 @@
 package me.mazeika.transhift.puncher.server;
 
-import me.mazeika.transhift.puncher.tags.Tag;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;

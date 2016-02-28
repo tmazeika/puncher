@@ -1,6 +1,4 @@
-package me.mazeika.transhift.puncher.tags;
-
-import me.mazeika.transhift.puncher.server.Remote;
+package me.mazeika.transhift.puncher.server;
 
 import java.util.Optional;
 
