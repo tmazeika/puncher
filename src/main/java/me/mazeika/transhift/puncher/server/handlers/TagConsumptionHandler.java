@@ -1,7 +1,7 @@
 package me.mazeika.transhift.puncher.server.handlers;
 
 import me.mazeika.transhift.puncher.server.Remote;
-import me.mazeika.transhift.puncher.server.Tag;
+import me.mazeika.transhift.puncher.tags.Tag;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

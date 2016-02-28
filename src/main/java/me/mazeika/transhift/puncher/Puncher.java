@@ -9,6 +9,7 @@ import me.mazeika.transhift.puncher.server.ServerModule;
 import me.mazeika.transhift.puncher.pipeline.Pipeline;
 import me.mazeika.transhift.puncher.server.Server;
 import me.mazeika.transhift.puncher.server.handlers.HandlerModule;
+import me.mazeika.transhift.puncher.tags.TagsModule;
 
 import java.io.IOException;
 
@@ -20,7 +21,7 @@ public class Puncher
                 new OptionsModule(args),
                 new PipelineModule(),
                 new ServerModule(),
-                new TagModule(),
+                new TagsModule(),
                 new HandlerModule());
 
         // add shutdown hook

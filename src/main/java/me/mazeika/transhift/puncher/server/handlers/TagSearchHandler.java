@@ -1,8 +1,8 @@
 package me.mazeika.transhift.puncher.server.handlers;
 
 import me.mazeika.transhift.puncher.server.Remote;
-import me.mazeika.transhift.puncher.server.Tag;
-import me.mazeika.transhift.puncher.server.TagPool;
+import me.mazeika.transhift.puncher.tags.Tag;
+import me.mazeika.transhift.puncher.tags.TagPool;
 
 import javax.inject.Inject;
 
