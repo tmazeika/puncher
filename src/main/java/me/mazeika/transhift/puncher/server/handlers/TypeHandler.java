@@ -1,5 +1,6 @@
 package me.mazeika.transhift.puncher.server.handlers;
 
+import com.google.common.io.ByteStreams;
 import me.mazeika.transhift.puncher.server.Remote;
 import me.mazeika.transhift.puncher.server.RemoteType;
 import org.apache.logging.log4j.LogManager;
@@ -30,8 +31,11 @@ class TypeHandler implements Handler
     @Override
     public void handle(final Remote remote) throws Exception
     {
-        final byte b = remote.waitAndRead();
-        final Optional<RemoteType> typeOp = RemoteType.fromByte(b);
+        final byte[] b = new byte[1];
+
+        ByteStreams.readFully(remote.in(), b);
+
+        final Optional<RemoteType> typeOp = RemoteType.fromByte(b[0]);
 
         if (typeOp.isPresent()) {
             switch (typeOp.get()) {
@@ -45,7 +49,7 @@ class TypeHandler implements Handler
         }
         else {
             logger.debug("{}: got wrong RemoteType 0x{}", remote,
-                    Integer.toHexString(b));
+                    Integer.toHexString(b[0]));
         }
     }
 }

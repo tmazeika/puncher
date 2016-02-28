@@ -1,61 +1,49 @@
 package me.mazeika.transhift.puncher.server;
 
 import com.google.inject.assistedinject.Assisted;
+import me.mazeika.transhift.puncher.server.meta.MetaMap;
 import me.mazeika.transhift.puncher.tags.Tag;
 
 import javax.inject.Inject;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.Socket;
-import java.util.Optional;
 
 class RemoteImpl implements Remote
 {
+    private final MetaMap metaMap;
     private final Socket socket;
 
-    private Tag tag;
-
     @Inject
-    public RemoteImpl(@Assisted final Socket socket)
+    public RemoteImpl(final MetaMap metaMap, @Assisted final Socket socket)
     {
+        this.metaMap = metaMap;
         this.socket = socket;
     }
 
     @Override
-    public Socket getSocket()
+    public Socket socket()
     {
         return socket;
     }
 
     @Override
-    public byte[] waitAndRead(int n) throws IOException
+    public InputStream in() throws IOException
     {
-        final byte[] b = new byte[n];
-        final InputStream in = socket.getInputStream();
-
-        int tempB;
-
-        for (int i = 0; i < n; i++) {
-            if ((tempB = in.read()) == -1) {
-                throw new IllegalStateException("eof");
-            }
-
-            b[i] = (byte) tempB;
-        }
-
-        return b;
+        return socket.getInputStream();
     }
 
     @Override
-    public Optional<Tag> getTag()
+    public OutputStream out() throws IOException
     {
-        return Optional.ofNullable(tag);
+        return socket.getOutputStream();
     }
 
     @Override
-    public void setTag(Tag tag)
+    public MetaMap meta()
     {
-        this.tag = tag;
+        return metaMap;
     }
 
     @Override

@@ -18,6 +18,9 @@ dependencies {
     compile 'com.google.inject.extensions:guice-assistedinject:4.0'
     compile 'com.google.inject.extensions:guice-throwingproviders:4.0'
 
+    // Guava
+    compile 'com.google.guava:guava:19.0'
+
     // Apache Log4j
     compile 'org.apache.logging.log4j:log4j-core:2.5' // core
     compile 'org.apache.logging.log4j:log4j-api:2.5'  // api

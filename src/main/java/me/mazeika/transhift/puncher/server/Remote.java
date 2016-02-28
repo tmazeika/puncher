@@ -1,9 +1,11 @@
 package me.mazeika.transhift.puncher.server;
 
+import me.mazeika.transhift.puncher.server.meta.MetaMap;
 import me.mazeika.transhift.puncher.tags.Tag;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Optional;
 
@@ -14,48 +16,18 @@ public interface Remote
      *
      * @return the socket
      */
-    Socket getSocket();
+    Socket socket();
+
+    InputStream in() throws IOException;
+
+    OutputStream out() throws IOException;
 
     /**
-     * Reads {@code n} bytes from the socket's {@link InputStream}, throwing an
-     * error if it couldn't be fully read.
+     * Gets the meta map associated with this Remote.
      *
-     * @param n the number of bytes to read
-     *
-     * @return the read bytes
-     *
-     * @throws IOException when an error occurs with the socket or {@code n}
-     * bytes couldn't be read
+     * @return the meta map
      */
-    byte[] waitAndRead(int n) throws IOException;
-
-    /**
-     * Reads a byte from the socket's {@link InputStream}, throwing an
-     * error if it couldn't be read.
-     *
-     * @return the read byte
-     *
-     * @throws IOException when an error occurs with the socket or the byte
-     * couldn't be read
-     */
-    default byte waitAndRead() throws IOException
-    {
-        return waitAndRead(1)[0];
-    }
-
-    /**
-     * Gets an optional describing the tag.
-     *
-     * @return an optional describing the tag
-     */
-    Optional<Tag> getTag();
-
-    /**
-     * Sets the tag.
-     *
-     * @param tag the tag
-     */
-    void setTag(Tag tag);
+    MetaMap meta();
 
     interface Factory
     {

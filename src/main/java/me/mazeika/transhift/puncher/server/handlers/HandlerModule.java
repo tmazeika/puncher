@@ -13,7 +13,7 @@ public class HandlerModule extends AbstractModule
                 .to(TagConsumptionHandler.class);
         bind(Handler.class).annotatedWith(Handler.TagProduction.class)
                 .to(TagProductionHandler.class);
-        bind(Handler.class).annotatedWith(Handler.Search.class)
+        bind(Handler.class).annotatedWith(Handler.TagSearch.class)
                 .to(TagSearchHandler.class);
     }
 }

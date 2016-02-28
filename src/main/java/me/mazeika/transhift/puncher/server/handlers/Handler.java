@@ -34,5 +34,5 @@ public interface Handler
     @interface TagProduction { }
 
     @BindingAnnotation @Target({ FIELD, PARAMETER, METHOD }) @Retention(RUNTIME)
-    @interface Search { }
+    @interface TagSearch { }
 }

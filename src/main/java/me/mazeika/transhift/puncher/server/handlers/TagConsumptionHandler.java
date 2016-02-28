@@ -1,6 +1,8 @@
 package me.mazeika.transhift.puncher.server.handlers;
 
+import com.google.common.io.ByteStreams;
 import me.mazeika.transhift.puncher.server.Remote;
+import me.mazeika.transhift.puncher.server.meta.MetaKeys;
 import me.mazeika.transhift.puncher.tags.Tag;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -17,7 +19,7 @@ class TagConsumptionHandler implements Handler
 
     @Inject
     public TagConsumptionHandler(final Tag.Factory tagFactory,
-                                 @Handler.Search final Provider<Handler>
+                                 @TagSearch final Provider<Handler>
                                          tagSearchHandlerProvider)
     {
         this.tagFactory = tagFactory;
@@ -27,12 +29,14 @@ class TagConsumptionHandler implements Handler
     @Override
     public void handle(final Remote remote) throws Exception
     {
-        final Tag tag = tagFactory.create(remote.waitAndRead(Tag.LENGTH));
+        final byte[] tagBytes = new byte[Tag.LENGTH];
 
-        remote.setTag(tag);
+        ByteStreams.readFully(remote.in(), tagBytes);
+
+        final Tag tag = tagFactory.create(tagBytes);
 
         logger.debug("{}: received tag {}", remote, tag.toString());
-
+        remote.meta().set(MetaKeys.TAG, tag);
         tagSearchHandlerProvider.get().handle(remote);
     }
 }
