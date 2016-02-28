@@ -12,11 +12,14 @@ import java.util.Optional;
 public class TagSearchHandler implements Handler
 {
     private final TagPool tagPool;
+    private final Handler peerMatchHandler;
 
     @Inject
-    public TagSearchHandler(final TagPool tagPool)
+    public TagSearchHandler(final TagPool tagPool,
+                            @Handler.PeerMatch final Handler peerMatchHandler)
     {
         this.tagPool = tagPool;
+        this.peerMatchHandler = peerMatchHandler;
     }
 
     @Override
@@ -29,6 +32,7 @@ public class TagSearchHandler implements Handler
 
         if (peerRemoteOp.isPresent()) {
             remote.meta().set(MetaKeys.PEER, peerRemoteOp.get());
+            peerMatchHandler.handle(remote);
         }
         else {
             remote.out().write(Protocol.PEER_NOT_FOUND);

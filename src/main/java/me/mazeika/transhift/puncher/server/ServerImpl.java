@@ -51,7 +51,7 @@ class ServerImpl implements Server
                     try {
                         processorProvider.get().process(socket);
                     }
-                    catch (Exception e) {
+                    catch (final Exception e) {
                         logger.warn(socket.getRemoteSocketAddress() +
                                 " error: " + e.getMessage(), e);
                     }
@@ -59,14 +59,14 @@ class ServerImpl implements Server
                         try {
                             socket.close();
                         }
-                        catch (IOException ignored) {
+                        catch (final IOException ignored) {
                         }
                     }
 
                     logger.info("{}: closing", socket.getRemoteSocketAddress());
                 });
             }
-            catch (InterruptedException ignored) { }
+            catch (final InterruptedException ignored) { }
         }
     }
 

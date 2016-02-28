@@ -35,4 +35,7 @@ public interface Handler
 
     @BindingAnnotation @Target({ FIELD, PARAMETER, METHOD }) @Retention(RUNTIME)
     @interface TagSearch { }
+
+    @BindingAnnotation @Target({ FIELD, PARAMETER, METHOD }) @Retention(RUNTIME)
+    @interface PeerMatch { }
 }
