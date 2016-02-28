@@ -37,5 +37,5 @@ public interface Handler
     @interface TagSearch { }
 
     @BindingAnnotation @Target({ FIELD, PARAMETER, METHOD }) @Retention(RUNTIME)
-    @interface PeerMatch { }
+    @interface AddressExchange { }
 }

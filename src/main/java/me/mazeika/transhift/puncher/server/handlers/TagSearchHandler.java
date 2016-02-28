@@ -7,19 +7,21 @@ import me.mazeika.transhift.puncher.tags.Tag;
 import me.mazeika.transhift.puncher.tags.TagPool;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import java.util.Optional;
 
 public class TagSearchHandler implements Handler
 {
     private final TagPool tagPool;
-    private final Handler peerMatchHandler;
+    private final Provider<Handler> peerMatchHandlerProvider;
 
     @Inject
     public TagSearchHandler(final TagPool tagPool,
-                            @Handler.PeerMatch final Handler peerMatchHandler)
+                            @AddressExchange final Provider<Handler>
+                                    peerMatchHandlerProvider)
     {
         this.tagPool = tagPool;
-        this.peerMatchHandler = peerMatchHandler;
+        this.peerMatchHandlerProvider = peerMatchHandlerProvider;
     }
 
     @Override
@@ -32,7 +34,7 @@ public class TagSearchHandler implements Handler
 
         if (peerRemoteOp.isPresent()) {
             remote.meta().set(MetaKeys.PEER, peerRemoteOp.get());
-            peerMatchHandler.handle(remote);
+            peerMatchHandlerProvider.get().handle(remote);
         }
         else {
             remote.out().write(Protocol.PEER_NOT_FOUND);

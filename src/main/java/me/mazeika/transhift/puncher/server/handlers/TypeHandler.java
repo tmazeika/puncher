@@ -18,11 +18,10 @@ class TypeHandler implements Handler
     private final Provider<Handler> tagProductionHandlerProvider;
 
     @Inject
-    public TypeHandler(
-            @Handler.TagConsumption final Provider<Handler>
-                    tagConsumptionHandlerProvider,
-            @Handler.TagProduction final Provider<Handler>
-                    tagProductionHandlerProvider)
+    public TypeHandler(@TagConsumption final Provider<Handler>
+                                   tagConsumptionHandlerProvider,
+                       @TagProduction final Provider<Handler>
+                               tagProductionHandlerProvider)
     {
         this.tagConsumptionHandlerProvider = tagConsumptionHandlerProvider;
         this.tagProductionHandlerProvider = tagProductionHandlerProvider;
@@ -31,11 +30,11 @@ class TypeHandler implements Handler
     @Override
     public void handle(final Remote remote) throws Exception
     {
-        final byte[] b = new byte[1];
+        final byte[] typeByte = new byte[1];
 
-        ByteStreams.readFully(remote.in(), b);
+        ByteStreams.readFully(remote.in(), typeByte);
 
-        final Optional<RemoteType> typeOp = RemoteType.fromByte(b[0]);
+        final Optional<RemoteType> typeOp = RemoteType.fromByte(typeByte[0]);
 
         if (typeOp.isPresent()) {
             switch (typeOp.get()) {
@@ -49,7 +48,7 @@ class TypeHandler implements Handler
         }
         else {
             logger.debug("{}: got wrong RemoteType 0x{}", remote,
-                    Integer.toHexString(b[0]));
+                    Integer.toHexString(typeByte[0]));
         }
     }
 }

@@ -6,7 +6,7 @@ import me.mazeika.transhift.puncher.server.meta.MetaKeys;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-class PeerMatchHandler implements Handler
+class AddressExchangeHandler implements Handler
 {
     private static final Logger logger = LogManager.getLogger();
 
