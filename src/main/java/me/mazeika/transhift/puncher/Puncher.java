@@ -5,6 +5,7 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import me.mazeika.transhift.puncher.options.OptionsModule;
 import me.mazeika.transhift.puncher.pipeline.PipelineModule;
+import me.mazeika.transhift.puncher.pool.PoolModule;
 import me.mazeika.transhift.puncher.server.ServerModule;
 import me.mazeika.transhift.puncher.pipeline.Pipeline;
 import me.mazeika.transhift.puncher.server.Server;
@@ -24,7 +25,8 @@ public class Puncher
                 new ServerModule(),
                 new TagsModule(),
                 new HandlerModule(),
-                new MetaModule());
+                new MetaModule(),
+                new PoolModule());
 
         // add shutdown hook
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {

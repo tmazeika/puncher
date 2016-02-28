@@ -47,24 +47,7 @@ class ServerImpl implements Server
             try {
                 final Socket socket = queue.take();
 
-                exec.execute(() -> {
-                    try {
-                        processorProvider.get().process(socket);
-                    }
-                    catch (final Exception e) {
-                        logger.warn(socket.getRemoteSocketAddress() +
-                                " error: " + e.getMessage(), e);
-                    }
-                    finally {
-                        try {
-                            socket.close();
-                        }
-                        catch (final IOException ignored) {
-                        }
-                    }
-
-                    logger.info("{}: closing", socket.getRemoteSocketAddress());
-                });
+                exec.execute(() -> processorProvider.get().process(socket));
             }
             catch (final InterruptedException ignored) { }
         }

@@ -17,5 +17,7 @@ public class HandlerModule extends AbstractModule
                 .to(TagSearchHandler.class);
         bind(Handler.class).annotatedWith(Handler.AddressExchange.class)
                 .to(AddressExchangeHandler.class);
+        bind(Handler.class).annotatedWith(Handler.Block.class)
+                .to(BlockHandler.class);
     }
 }

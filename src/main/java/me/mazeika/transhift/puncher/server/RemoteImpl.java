@@ -8,17 +8,27 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.Collection;
 
 class RemoteImpl implements Remote
 {
+    private final Collection<Remote> globalPool;
     private final MetaMap metaMap;
     private final Socket socket;
 
+    private boolean destroyed;
+
     @Inject
-    public RemoteImpl(final MetaMap metaMap, @Assisted final Socket socket)
+    public RemoteImpl(@Pool final Collection<Remote> globalPool,
+                      final MetaMap metaMap, @Assisted final Socket socket)
     {
+        this.globalPool = globalPool;
         this.metaMap = metaMap;
         this.socket = socket;
+
+        synchronized (this.globalPool) {
+            globalPool.add(this);
+        }
     }
 
     @Override
@@ -43,6 +53,26 @@ class RemoteImpl implements Remote
     public MetaMap meta()
     {
         return metaMap;
+    }
+
+    @Override
+    public void destroy()
+    {
+        destroyed = true;
+
+        synchronized (globalPool) {
+            globalPool.remove(this);
+        }
+
+        synchronized (this) {
+            notify();
+        }
+    }
+
+    @Override
+    public boolean isDestroyed()
+    {
+        return destroyed;
     }
 
     @Override

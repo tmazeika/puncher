@@ -1,19 +1,18 @@
 package me.mazeika.transhift.puncher.tags;
 
 import com.google.inject.Singleton;
-import me.mazeika.transhift.puncher.server.Remote;
 
 import javax.inject.Inject;
 import java.security.SecureRandom;
-import java.util.*;
-import java.util.function.Predicate;
+import java.util.Collection;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Singleton
 class TagPoolImpl implements TagPool
 {
     private static final SecureRandom random = new SecureRandom();
 
-    private final Map<Tag, Remote> pool = new HashMap<>();
+    private final Collection<Tag> pool = ConcurrentHashMap.newKeySet();
     private final Tag.Factory tagInternFactory;
 
     @Inject
@@ -23,7 +22,7 @@ class TagPoolImpl implements TagPool
     }
 
     @Override
-    public void generateFor(final Remote remote)
+    public Tag generate()
     {
         final byte[] b = new byte[Tag.LENGTH];
         final Tag tag;
@@ -32,34 +31,19 @@ class TagPoolImpl implements TagPool
             do {
                 random.nextBytes(b);
             }
-            while (pool.keySet().stream().anyMatch(o -> o.equalsArray(b)));
+            while (pool.stream().anyMatch(e -> e.equalsArray(b)));
 
-            tag = tagInternFactory.create(b);
-
-            pool.put(tag, remote);
+            pool.add(tag = tagInternFactory.create(b));
         }
 
-        remote.setTag(tag);
+        return tag;
     }
 
     @Override
-    public Optional<Remote> findAndRemove(final Tag tag)
+    public void remove(final Tag tag)
     {
-        final Predicate<? super Map.Entry<Tag, Remote>> matchPredicate =
-                entry -> entry.getKey().equals(tag);
-        final Optional<Remote> result;
-
         synchronized (pool) {
-            // search for Tag and get Optional of Remote
-            result = pool.entrySet().stream()
-                    .filter(matchPredicate)
-                    .map(Map.Entry::getValue)
-                    .findAny();
-
-            // remove entry if found
-            result.ifPresent(e -> pool.entrySet().removeIf(matchPredicate));
+            pool.removeIf(e -> e.equals(tag));
         }
-
-        return result;
     }
 }
