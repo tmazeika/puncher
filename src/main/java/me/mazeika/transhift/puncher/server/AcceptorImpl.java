@@ -6,10 +6,16 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.inject.Inject;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.*;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.util.Arrays;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
@@ -37,7 +43,7 @@ class AcceptorImpl implements Acceptor
     }
 
     @Override
-    public BlockingQueue<Socket> accept() throws IOException
+    public BlockingQueue<Socket> accept() throws Exception
     {
         final BlockingQueue<Socket> queue = new LinkedBlockingQueue<>();
 
@@ -76,8 +82,20 @@ class AcceptorImpl implements Acceptor
         catch (IOException ignored) { }
     }
 
-    private void createSslServer() throws IOException
+    private void createSslServer() throws Exception
     {
+        /*final KeyStore ks = KeyStore.getInstance("JKS");
+
+        try (final InputStream ksIn =
+                     getClass().getResourceAsStream("/test_priv.key")) {
+            ks.load(ksIn, "test".toCharArray());
+        }
+
+        final KeyManagerFactory kmf = KeyManagerFactory.getInstance(
+                KeyManagerFactory.getDefaultAlgorithm());
+
+        kmf.init(ks, "test".toCharArray());*/
+
         final SSLServerSocketFactory factory =
                 (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
         final SSLServerSocket sslServerSocket = (SSLServerSocket) factory

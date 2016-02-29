@@ -16,7 +16,7 @@ import java.io.IOException;
 
 public class Puncher
 {
-    public static void main(String[] args) throws IOException
+    public static void main(String[] args) throws Exception
     {
         final Injector injector = Guice.createInjector(
                 new OptionsModule(args),

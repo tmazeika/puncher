@@ -2,6 +2,7 @@ package me.mazeika.transhift.puncher.server;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.security.KeyStoreException;
 import java.util.concurrent.BlockingQueue;
 
 public interface Acceptor
@@ -14,5 +15,5 @@ public interface Acceptor
      *
      * @throws IOException
      */
-    BlockingQueue<Socket> accept() throws IOException;
+    BlockingQueue<Socket> accept() throws Exception;
 }

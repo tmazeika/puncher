@@ -35,7 +35,7 @@ class ServerImpl implements Server
     }
 
     @Override
-    public void start() throws IOException
+    public void start() throws Exception
     {
         final BlockingQueue<Socket> queue = acceptor.accept();
         thread = Thread.currentThread();

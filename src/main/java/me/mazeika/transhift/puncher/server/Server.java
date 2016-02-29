@@ -9,5 +9,5 @@ public interface Server
      *
      * @throws IOException
      */
-    void start() throws IOException;
+    void start() throws Exception;
 }
