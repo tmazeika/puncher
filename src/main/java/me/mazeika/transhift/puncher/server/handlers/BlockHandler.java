@@ -36,7 +36,9 @@ class BlockHandler implements Handler
                     remote.meta().get(MetaKeys.TAG).get().equals(tag)) {
                 peer = source;
 
-                monitor.notify();
+                synchronized (monitor) {
+                    monitor.notify();
+                }
 
                 return true;
             }
