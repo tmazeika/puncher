@@ -6,10 +6,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.inject.Inject;
+import javax.net.ssl.SSLServerSocketFactory;
 import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.net.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -17,6 +16,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 class AcceptorImpl implements Acceptor
 {
+    private static final int BACKLOG = 128;
     private static final Logger logger = LogManager.getLogger();
 
     private final Executor exec = Executors.newSingleThreadExecutor();
@@ -38,11 +38,8 @@ class AcceptorImpl implements Acceptor
     public BlockingQueue<Socket> accept() throws IOException
     {
         final BlockingQueue<Socket> queue = new LinkedBlockingQueue<>();
-        serverSocket = new ServerSocket();
 
-        serverSocket.bind(new InetSocketAddress(
-                options.getHost(), options.getPort()));
-
+        createSslServer();
         logger.info("listening @ {}", serverSocket.getLocalSocketAddress());
 
         // add shutdown hook
@@ -75,5 +72,14 @@ class AcceptorImpl implements Acceptor
             serverSocket.close();
         }
         catch (IOException ignored) { }
+    }
+
+    private void createSslServer() throws IOException
+    {
+        final SSLServerSocketFactory factory =
+                (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
+
+        serverSocket = factory.createServerSocket(options.getPort(), BACKLOG,
+                InetAddress.getByName(options.getHost()));
     }
 }
