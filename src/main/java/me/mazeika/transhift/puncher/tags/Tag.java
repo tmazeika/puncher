@@ -2,7 +2,8 @@ package me.mazeika.transhift.puncher.tags;
 
 public interface Tag
 {
-    int LENGTH = 16;
+//    int LENGTH = 16;
+    int LENGTH = 2;
 
     /**
      * Gets a copy of the backing byte array.

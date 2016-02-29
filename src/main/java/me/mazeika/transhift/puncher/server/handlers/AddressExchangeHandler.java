@@ -13,21 +13,14 @@ class AddressExchangeHandler implements Handler
     @Override
     public void handle(final Remote remote) throws Exception
     {
-        // if implemented correctly, cannot throw NPE
         final Remote peer = remote.meta().get(MetaKeys.PEER).get();
 
-        // tell target the peer address
         remote.out().write(Protocol.PEER_FOUND);
         remote.out().write(
                 peer.socket().getRemoteSocketAddress().toString().getBytes());
         remote.out().write('\n');
+        remote.out().flush();
 
-        // tell source this remote's address
-        peer.out().write(Protocol.PEER_FOUND);
-        peer.out().write(
-                remote.socket().getRemoteSocketAddress().toString().getBytes());
-        peer.out().write('\n');
-
-        logger.debug("{} & {}: addresses exchanged", remote, peer);
+        logger.debug("{}: sent address of {}", remote, peer);
     }
 }

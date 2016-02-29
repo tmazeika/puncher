@@ -51,18 +51,6 @@ public interface Remote
      */
     MetaMap meta();
 
-    /**
-     * Destroys this Remote, removing it from the global Remote pool.
-     */
-    void destroy();
-
-    /**
-     * Gets if this Remote is destroyed.
-     *
-     * @return {@code true} if this is destroyed
-     */
-    boolean isDestroyed();
-
     interface Factory
     {
         /**
@@ -74,7 +62,4 @@ public interface Remote
          */
         Remote create(Socket socket);
     }
-
-    @BindingAnnotation @Target({ FIELD, PARAMETER, METHOD }) @Retention(RUNTIME)
-    @interface Pool { }
 }

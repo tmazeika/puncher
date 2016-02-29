@@ -9,6 +9,8 @@ import org.apache.logging.log4j.Logger;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 class TagProductionHandler implements Handler
 {
@@ -35,6 +37,7 @@ class TagProductionHandler implements Handler
 
         // send the generated tag to the remote
         remote.out().write(tag.get());
+        remote.out().flush();
 
         logger.debug("{}: wrote tag {}", remote, tag);
         blockHandlerProvider.get().handle(remote);

@@ -4,6 +4,7 @@ import com.google.inject.assistedinject.Assisted;
 
 import javax.inject.Inject;
 import java.util.Arrays;
+import java.util.stream.Stream;
 
 class TagImpl implements Tag
 {
@@ -35,19 +36,21 @@ class TagImpl implements Tag
     @Override
     public String toString()
     {
-        final StringBuilder builder = new StringBuilder(b.length * 2);
+        final StringBuilder builder = new StringBuilder(b.length * 3);
 
-        builder.append("0x");
+        for (byte rawE : b) {
+            final int e = rawE < 0 ? rawE & 0xff : rawE;
 
-        for (byte e : b) {
+            builder.append(':');
+
             if (e < 0x10) {
-                builder.append("0");
+                builder.append('0');
             }
 
             builder.append(Integer.toHexString(e));
         }
 
-        return builder.toString();
+        return builder.substring(1);
     }
 
     @Override

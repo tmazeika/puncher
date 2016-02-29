@@ -1,6 +1,7 @@
 package me.mazeika.transhift.puncher.server.handlers;
 
 import com.google.common.io.ByteStreams;
+import me.mazeika.transhift.puncher.protocol.Protocol;
 import me.mazeika.transhift.puncher.server.Remote;
 import me.mazeika.transhift.puncher.server.RemoteType;
 import org.apache.logging.log4j.LogManager;
@@ -47,6 +48,9 @@ class TypeHandler implements Handler
             }
         }
         else {
+            remote.out().write(Protocol.INVALID_REMOTE_TYPE);
+            remote.out().flush();
+
             logger.debug("{}: got wrong RemoteType 0x{}", remote,
                     Integer.toHexString(typeByte[0]));
         }

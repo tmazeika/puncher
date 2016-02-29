@@ -1,15 +1,19 @@
 package me.mazeika.transhift.puncher.tags;
 
 import com.google.inject.Singleton;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.inject.Inject;
 import java.security.SecureRandom;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Singleton
 class TagPoolImpl implements TagPool
 {
+    private static final Logger logger = LogManager.getLogger();
     private static final SecureRandom random = new SecureRandom();
 
     private final Collection<Tag> pool = ConcurrentHashMap.newKeySet();
@@ -30,6 +34,7 @@ class TagPoolImpl implements TagPool
         synchronized (pool) {
             do {
                 random.nextBytes(b);
+                logger.trace("generated tag {}", Arrays.toString(b));
             }
             while (pool.stream().anyMatch(e -> e.equalsArray(b)));
 

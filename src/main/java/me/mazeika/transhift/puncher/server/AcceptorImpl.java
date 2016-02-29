@@ -53,6 +53,7 @@ class AcceptorImpl implements Acceptor
                 try {
                     final Socket remote = serverSocket.accept();
 
+                    remote.setKeepAlive(true);
                     queue.put(remote);
                     logger.info("{}: accepted",
                             remote.getRemoteSocketAddress());

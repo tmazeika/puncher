@@ -33,11 +33,10 @@ class ProcessorImpl implements Processor
             socket.close();
         }
         catch (final Exception e) {
-            logger.warn(socket.getRemoteSocketAddress() + " error: " +
+            logger.warn(socket.getRemoteSocketAddress() + ": " +
                     e.getMessage(), e);
         }
 
-        remote.destroy();
         logger.info("{}: closing", socket.getRemoteSocketAddress());
     }
 }
