@@ -79,7 +79,7 @@ class AcceptorImpl implements Acceptor
         final SSLServerSocketFactory factory =
                 (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
 
-        serverSocket = factory.createServerSocket(options.getPort(), BACKLOG,
-                InetAddress.getByName(options.getHost()));
+        serverSocket = factory.createServerSocket(options.port(), BACKLOG,
+                InetAddress.getByName(options.host()));
     }
 }

@@ -7,22 +7,22 @@ public interface Options
      *
      * @return the host
      */
-    String getHost();
+    String host();
 
     /**
      * Gets the port. Ranges from 0 to 65535.
      *
      * @return the port
      */
-    int getPort();
+    int port();
 
     interface Factory
     {
         /**
          * Creates an {@link Options} instance.
          *
-         * @param host the host, see {@link #getHost()} for valid input
-         * @param port the port, see {@link #getPort()} for valid input
+         * @param host the host, see {@link #host()} for valid input
+         * @param port the port, see {@link #port()} for valid input
          *
          * @return a new Options instance
          */

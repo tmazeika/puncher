@@ -17,13 +17,13 @@ class OptionsImpl implements Options
     }
 
     @Override
-    public String getHost()
+    public String host()
     {
         return host;
     }
 
     @Override
-    public int getPort()
+    public int port()
     {
         return port;
     }
