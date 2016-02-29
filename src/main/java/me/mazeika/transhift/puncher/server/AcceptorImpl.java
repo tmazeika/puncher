@@ -6,9 +6,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.inject.Inject;
+import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 import java.io.IOException;
 import java.net.*;
+import java.util.Arrays;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -78,8 +80,16 @@ class AcceptorImpl implements Acceptor
     {
         final SSLServerSocketFactory factory =
                 (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
+        final SSLServerSocket sslServerSocket = (SSLServerSocket) factory
+                .createServerSocket(options.port(), BACKLOG,
+                        InetAddress.getByName(options.host()));
+        serverSocket = sslServerSocket;
 
-        serverSocket = factory.createServerSocket(options.port(), BACKLOG,
-                InetAddress.getByName(options.host()));
+        logger.debug(
+                "SSL initialized:\n\tcipherSuites={}\n\tprotocols={}",
+                Arrays.toString(sslServerSocket.getSSLParameters()
+                        .getCipherSuites()),
+                Arrays.toString(sslServerSocket.getSSLParameters()
+                        .getProtocols()));
     }
 }
